@@ -206,7 +206,7 @@ jobs:
   #  ETAPA 6 — IaC Scanning (Trivy config)
   # ══════════════════════════════════════════════════════════════════════════
   iac-scan:
-    name: "🏗️ IaC Scan - Trivy Config"
+    name: "🏗️ IaC Scan - Trivy"
     runs-on: ubuntu-latest
     needs: install
     steps:
@@ -243,7 +243,7 @@ jobs:
   #  ETAPA 7 — Build + Scanare Imagine Docker
   # ══════════════════════════════════════════════════════════════════════════
   docker-build-scan:
-    name: "🐳Docker - Build & Scanare"
+    name: "🐳 Docker"
     runs-on: ubuntu-latest
     needs: [quality-gate, sast-scan, dependency-scan, secrets-scan, iac-scan]
     steps:
@@ -318,7 +318,7 @@ jobs:
   #  ETAPA 9 — Deploy pe Render
   # ══════════════════════════════════════════════════════════════════════════
   deploy-render:
-    name: "☁️ Deploy pe Render"
+    name: "☁️ Deploy"
     runs-on: ubuntu-latest
     needs: docker-build-scan
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
