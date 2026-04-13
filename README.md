@@ -4,7 +4,7 @@
 
 **6. Pipeline DevSecOps de Baza**
 
-   Configureaza un pipeline CI/CD (GitHub Actions) care include SAST, scanare dependente si scanare imagini Docker. Tenta personala: Studentul integreaza pipeline-ul pe un proiect personal sau de la facultate.
+Configureaza un pipeline CI/CD (GitHub Actions) care include SAST, scanare dependente si scanare imagini Docker. Tenta personala: Studentul integreaza pipeline-ul pe un proiect personal sau de la facultate.
 
 ## Despre proiect
 
@@ -14,7 +14,7 @@ doar dupa ce toate scanarile de securitate trec cu succes.
 
 ```
 
-PIPELINE DevSecOps — (11 etape)
+PIPELINE DevSecOps — (10 etape)
 
   push → install ──┬── quality-gate    (ESLint + Karma + ng build)
                    ├── SAST            (Semgrep)
@@ -28,8 +28,6 @@ PIPELINE DevSecOps — (11 etape)
       Publish + Deploy - Render (https://student-portal.onrender.com)
                  │
       DAST - OWASP ZAP
-                 │
-      Security-summary
 
 ```
 
@@ -126,7 +124,7 @@ In plus, **Trivy** si **npm audit** detecteaza CVE-uri in dependintele npm (Angu
 ```
 angular-devsecops-pipeline/
 ├── .github/workflows/
-│   └── devsecops-pipeline.yml      ← Pipeline complet (11 etape)
+│   └── devsecops-pipeline.yml      ← Pipeline complet (10 etape)
 ├── .gitleaks.toml                  ← Configuratie secret scanning
 ├── nginx/
 │   ├── nginx.conf
@@ -187,7 +185,7 @@ Repository → Security (tab) → Secret scanning
 
 GitHub Secret Scanning nativ detecteaza automat tokeni si chei expuse la fiecare push.
 
-### Actions — Logs, artefacte si Summary
+### Actions — Logs si artefacte
 
 ```
 Repository → Actions → ultimul workflow run
@@ -196,27 +194,26 @@ Repository → Actions → ultimul workflow run
 - Status fiecare job (verde = succes, rosu = esec)
 - Log-uri detaliate per step
 - Artefacte generate: `sast-report`, `dependency-reports`, `gitleaks-report`, `iac-report`, `zap_scan`, `quality-reports`
-- Summary: raportul tabel de securitate generat de `security-summary` job
 
 ---
 
 ## Instrumente folosite
 
-| Instrument                                                     | Rol                                              | Cost                   |
-| -------------------------------------------------------------- | ------------------------------------------------ | ---------------------- |
-| [Semgrep CE](https://semgrep.dev)                              | SAST (p/security-audit, p/typescript, p/secrets) | Gratuit                |
-| [Trivy](https://trivy.dev)                                     | SCA filesystem + IaC config + Container scanning | Gratuit                |
-| [npm audit](https://docs.npmjs.com/cli/v10/commands/npm-audit) | SCA npm advisory database                        | Gratuit                |
-| [Gitleaks](https://gitleaks.io)                                | Secret detection (tot istoricul Git)             | Gratuit                |
-| [OWASP ZAP](https://www.zaproxy.org)                           | DAST (baseline scan aplicatie live)              | Gratuit                |
-| [ESLint](https://eslint.org)                                   | Linting + reguli securitate (no-eval etc.)       | Gratuit                |
-| [Karma](https://karma-runner.github.io)                        | Teste unitare                                    | Gratuit                |
-| [GitHub Actions](https://github.com/features/actions)          | CI/CD (11 etape automate)                        | Gratuit                |
-| [GHCR](https://ghcr.io)                                        | Container Registry                               | Gratuit                |
-| [Render](https://render.com)                                   | Cloud Deploy PaaS                                | Gratuit (free tier)    |
+| Instrument                                                     | Rol                                              | Cost                |
+| -------------------------------------------------------------- | ------------------------------------------------ | ------------------- |
+| [Semgrep CE](https://semgrep.dev)                              | SAST (p/security-audit, p/typescript, p/secrets) | Gratuit             |
+| [Trivy](https://trivy.dev)                                     | SCA filesystem + IaC config + Container scanning | Gratuit             |
+| [npm audit](https://docs.npmjs.com/cli/v10/commands/npm-audit) | SCA npm advisory database                        | Gratuit             |
+| [Gitleaks](https://gitleaks.io)                                | Secret detection (tot istoricul Git)             | Gratuit             |
+| [OWASP ZAP](https://www.zaproxy.org)                           | DAST (baseline scan aplicatie live)              | Gratuit             |
+| [ESLint](https://eslint.org)                                   | Linting + reguli securitate (no-eval etc.)       | Gratuit             |
+| [Karma](https://karma-runner.github.io)                        | Teste unitare                                    | Gratuit             |
+| [GitHub Actions](https://github.com/features/actions)          | CI/CD (10 etape automate)                        | Gratuit             |
+| [GHCR](https://ghcr.io)                                        | Container Registry                               | Gratuit             |
+| [Render](https://render.com)                                   | Cloud Deploy PaaS                                | Gratuit (free tier) |
 
 ---
 
 ## Licenta
 
-Proiect educational | Master SISC — UPT | Disciplina SAC
+Proiect educational | UPT - Master SISC | Securitatea Aplicatiilor Cloud

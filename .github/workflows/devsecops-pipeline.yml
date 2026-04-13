@@ -1,4 +1,4 @@
-name: "DevSecOps Pipeline — Angular"
+name: "DevSecOps Pipeline"
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
   #  ETAPA 1 — Instalare Dependente
   # ══════════════════════════════════════════════════════════════════════════
   install:
-    name: "Instalare & Cache node_modules"
+    name: "📦 Instalare"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -41,7 +41,7 @@ jobs:
   #  ETAPA 2 — Calitate Cod
   # ══════════════════════════════════════════════════════════════════════════
   quality-gate:
-    name: "ESLint + Teste + Build"
+    name: "🧪 ESLint + Teste + Build"
     runs-on: ubuntu-latest
     needs: install
     steps:
@@ -86,7 +86,7 @@ jobs:
   #  ETAPA 3 — SAST
   # ══════════════════════════════════════════════════════════════════════════
   sast-scan:
-    name: "SAST — Semgrep"
+    name: "🛡️ SAST - Semgrep"
     runs-on: ubuntu-latest
     needs: install
 
@@ -121,7 +121,7 @@ jobs:
   #  ETAPA 4 — Scanare Dependente (SCA)
   # ══════════════════════════════════════════════════════════════════════════
   dependency-scan:
-    name: "SCA — Scanare Dependente npm"
+    name: "📦 SCA - Dependente npm"
     runs-on: ubuntu-latest
     needs: install
     steps:
@@ -165,7 +165,7 @@ jobs:
   #  ETAPA 5 — Scanare Secrete
   # ══════════════════════════════════════════════════════════════════════════
   secrets-scan:
-    name: "Detectare Secrete — Gitleaks"
+    name: "🔑 Detectare Secrete - Gitleaks"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -206,7 +206,7 @@ jobs:
   #  ETAPA 6 — IaC Scanning (Trivy config)
   # ══════════════════════════════════════════════════════════════════════════
   iac-scan:
-    name: "IaC Scan — Trivy Config"
+    name: "🏗️ IaC Scan - Trivy Config"
     runs-on: ubuntu-latest
     needs: install
     steps:
@@ -243,7 +243,7 @@ jobs:
   #  ETAPA 7 — Build + Scanare Imagine Docker
   # ══════════════════════════════════════════════════════════════════════════
   docker-build-scan:
-    name: "Build & Scanare Docker"
+    name: "🐳Docker - Build & Scanare"
     runs-on: ubuntu-latest
     needs: [quality-gate, sast-scan, dependency-scan, secrets-scan, iac-scan]
     steps:
@@ -274,10 +274,10 @@ jobs:
           category: docker-trivy
 
   # ══════════════════════════════════════════════════════════════════════════
-  #  ETAPA 7 — Publicare
+  #  ETAPA 8 — Publicare
   # ══════════════════════════════════════════════════════════════════════════
   publish:
-    name: "Publicare Imagine"
+    name: "🚀 Publicare Imagine"
     runs-on: ubuntu-latest
     needs: docker-build-scan
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -315,10 +315,10 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ══════════════════════════════════════════════════════════════════════════
-  #  ETAPA 8 — Deploy pe Render
+  #  ETAPA 9 — Deploy pe Render
   # ══════════════════════════════════════════════════════════════════════════
   deploy-render:
-    name: "Deploy → Render"
+    name: "☁️ Deploy pe Render"
     runs-on: ubuntu-latest
     needs: docker-build-scan
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -364,10 +364,10 @@ jobs:
           exit 0
 
   # ══════════════════════════════════════════════════════════════════════════
-  #  ETAPA 9 — DAST
+  #  ETAPA 10 — DAST
   # ══════════════════════════════════════════════════════════════════════════
   dast-scan:
-    name: "DAST — OWASP ZAP"
+    name: "🌐 DAST - OWASP ZAP"
     runs-on: ubuntu-latest
     needs: deploy-render
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -388,38 +388,3 @@ jobs:
           path: |
             zap_baseline_report.html
             zap_baseline_report.json
-
-  # ══════════════════════════════════════════════════════════════════════════
-  #  ETAPA 10 — Raport Final
-  # ══════════════════════════════════════════════════════════════════════════
-  security-summary:
-    name: "Sumar Securitate"
-    runs-on: ubuntu-latest
-    needs:
-      [
-        sast-scan,
-        dependency-scan,
-        secrets-scan,
-        iac-scan,
-        docker-build-scan,
-        deploy-render,
-        dast-scan,
-      ]
-    if: always()
-    steps:
-      - name: "Generare sumar"
-        run: |
-          echo "## Raport Securitate DevSecOps — Angular" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Verificare | Instrument | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|------------|-----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 🛡️ SAST | Semgrep (JS/TS/Angular) | ${{ needs.sast-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📦 SCA | Trivy + npm audit | ${{ needs.dependency-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔑 Secrete | Gitleaks | ${{ needs.secrets-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🏗️ IaC | Trivy Config (Dockerfile+nginx) | ${{ needs.iac-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🐳 Docker | Trivy (imagine nginx) | ${{ needs.docker-build-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| ☁️ Deploy | Render Cloud | ${{ needs.deploy-render.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🌐 DAST | OWASP ZAP | ${{ needs.dast-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Data: $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
-          echo "Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
