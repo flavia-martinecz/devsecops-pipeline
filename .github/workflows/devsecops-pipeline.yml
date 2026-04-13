@@ -32,8 +32,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: "npm ci"
-        run: npm ci
+      - name: "npm install"
+        run: npm install
 
       - name: "Cache node_modules"
         uses: actions/cache/save@v5
@@ -56,10 +56,15 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: "Restaurare node_modules din cache"
+        id: cache-restore
         uses: actions/cache/restore@v5
         with:
           path: node_modules/
           key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: "npm install (fallback daca lipseste cache)"
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        run: npm install
 
       - name: "ESLint — Linting TypeScript + Reguli securitate"
         run: npx ng lint --format json --output-file eslint-results.json
@@ -137,10 +142,15 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: "Restaurare node_modules din cache"
+        id: cache-restore-sca
         uses: actions/cache/restore@v5
         with:
           path: node_modules/
           key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: "npm install (fallback daca lipseste cache)"
+        if: steps.cache-restore-sca.outputs.cache-hit != 'true'
+        run: npm install
 
       - name: "npm audit — Advisory Database"
         run: |
