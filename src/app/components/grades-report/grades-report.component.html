@@ -34,7 +34,7 @@
         <div class="form-group form-group--small">
           <label>Nota</label>
           <select [(ngModel)]="newGrade" name="grade">
-            <option *ngFor="let g of gradeOptions" [value]="g">{{ g }}</option>
+            <option *ngFor="let g of gradeOptions" [ngValue]="g">{{ g }}</option>
           </select>
         </div>
 

@@ -1,13 +1,13 @@
-import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink } from '@angular/router';
+import { Component } from "@angular/core";
+import { RouterOutlet, RouterLinkActive, RouterLink } from "@angular/router";
 
 @Component({
-  selector: 'app-root',
+  selector: "app-root",
   standalone: true,
-  imports: [RouterOutlet, RouterLink],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+  imports: [RouterOutlet, RouterLinkActive, RouterLink],
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.scss"],
 })
 export class AppComponent {
-  title = 'Portal Studenti';
+  title = "Portal Studenti";
 }

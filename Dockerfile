@@ -8,7 +8,7 @@ RUN apk add --no-cache python3 make g++
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN rm -f package-lock.json && npm install
+RUN npm ci
 
 COPY . .
 RUN npx ng build --configuration production

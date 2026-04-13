@@ -32,10 +32,14 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: "npm install"
-        run: |
-          rm -f package-lock.json
-          npm install
+      - name: "npm ci"
+        run: npm ci
+
+      - name: "Cache node_modules"
+        uses: actions/cache/save@v5
+        with:
+          path: node_modules/
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
   # ══════════════════════════════════════════════════════════════════════════
   #  ETAPA 2 — Calitate Cod
@@ -51,10 +55,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: "Instalare dependente"
-        run: |
-          rm -f package-lock.json
-          npm install
+      - name: "Restaurare node_modules din cache"
+        uses: actions/cache/restore@v5
+        with:
+          path: node_modules/
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: "ESLint — Linting TypeScript + Reguli securitate"
         run: npx ng lint --format json --output-file eslint-results.json
@@ -130,6 +135,12 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: "Restaurare node_modules din cache"
+        uses: actions/cache/restore@v5
+        with:
+          path: node_modules/
+          key: node-modules-${{ hashFiles('package-lock.json') }}
 
       - name: "npm audit — Advisory Database"
         run: |
