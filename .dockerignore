@@ -1,0 +1,15 @@
+.git
+.github
+.gitignore
+.gitleaks.toml
+*.md
+node_modules
+dist
+coverage
+.angular
+.vscode
+.idea
+e2e
+*.spec.ts
+karma.conf.js
+render.yaml

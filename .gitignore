@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.angular/
+coverage/
+*.js.map
+.env
+.env.local
+npm-debug.log*
+.vscode/
+.idea/

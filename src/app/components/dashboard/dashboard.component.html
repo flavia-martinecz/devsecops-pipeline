@@ -1,0 +1,24 @@
+<div class="dashboard">
+  <h2>Dashboard</h2>
+
+  <div class="stats-grid" *ngIf="stats">
+    <div class="stat-card">
+      <span class="stat-value">{{ stats.totalStudents }}</span>
+      <span class="stat-label">Studenti inregistrati</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ stats.totalGrades }}</span>
+      <span class="stat-label">Note inregistrate</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ stats.averageGrade | number: "1.2-2" }}</span>
+      <span class="stat-label">Media generala</span>
+    </div>
+  </div>
+
+  <div class="info-section" *ngIf="stats">
+    <img src="assets/imgs/dashboard.jpg" alt="Dashboard" class="dashboard-img" />
+  </div>
+
+  <p *ngIf="error" class="error">{{ error }}</p>
+</div>

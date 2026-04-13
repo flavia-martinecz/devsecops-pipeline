@@ -1,0 +1,23 @@
+<nav class="navbar">
+  <a class="navbar-brand" routerLink="/dashboard">
+    <img
+      src="assets/imgs/logo_upt.png"
+      alt="UPT Logo"
+      class="logo"
+      height="70"
+    />
+    <span class="brand-title">Portal Studenti</span>
+  </a>
+
+  <div class="nav-links">
+    <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+    <a routerLink="/students" routerLinkActive="active">Studenti</a>
+    <a routerLink="/search" routerLinkActive="active">Cautare</a>
+    <a routerLink="/add-student" routerLinkActive="active">Adauga Student</a>
+    <a routerLink="/grades" routerLinkActive="active">Raport Note</a>
+    <a routerLink="/login" routerLinkActive="active" class="login-link">Login</a>
+  </div>
+</nav>
+<main class="container">
+  <router-outlet></router-outlet>
+</main>

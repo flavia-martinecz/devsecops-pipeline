@@ -1,0 +1,18 @@
+#  Acest fisier defineste serviciul pe Render
+
+services:
+  - type: web
+    name: student-portal-angular
+    runtime: docker
+    # Render va folosi Dockerfile
+    dockerfilePath: ./Dockerfile
+    # Branch-ul monitorizat pentru auto-deploy
+    branch: main
+    # Plan gratuit
+    plan: free
+    # Health check endpoint
+    healthCheckPath: /
+    # Variabile de mediu
+    envVars:
+      - key: NODE_ENV
+        value: production

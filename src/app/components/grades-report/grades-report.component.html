@@ -1,0 +1,143 @@
+<div class="grades-report">
+  <h2>Raport Note</h2>
+
+  <div class="add-grade-section">
+    <h3>Adauga Nota</h3>
+
+    <div class="success-inline" *ngIf="gradeSuccess">
+      Nota a fost adaugata cu succes!
+    </div>
+
+    <form class="grade-form" (ngSubmit)="onAddGrade()">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Student</label>
+          <select [(ngModel)]="newStudentId" name="studentId">
+            <option value="">-- Selecteaza studentul --</option>
+            <option *ngFor="let s of allStudents" [value]="s.id">
+              {{ s.name }} ({{ s.faculty }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Materie</label>
+          <input
+            type="text"
+            [(ngModel)]="newSubject"
+            name="subject"
+            placeholder="ex: Retele de Calculatoare"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="form-group form-group--small">
+          <label>Nota</label>
+          <select [(ngModel)]="newGrade" name="grade">
+            <option *ngFor="let g of gradeOptions" [value]="g">{{ g }}</option>
+          </select>
+        </div>
+
+        <div class="form-group form-group--small">
+          <label>Semestru</label>
+          <select [(ngModel)]="newSemester" name="semester">
+            <option *ngFor="let s of semesterOptions" [value]="s">
+              {{ s }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group form-group--action">
+          <label>&nbsp;</label>
+          <button type="submit">Adauga</button>
+        </div>
+      </div>
+
+      <p class="error-msg" *ngIf="gradeError">{{ gradeError }}</p>
+    </form>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Facultate</label>
+      <select [(ngModel)]="filterFaculty" (ngModelChange)="applyFilters()">
+        <option value="">Toate facultatile</option>
+        <option *ngFor="let f of faculties" [value]="f">{{ f }}</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Semestru</label>
+      <select [(ngModel)]="filterSemester" (ngModelChange)="applyFilters()">
+        <option value="">Toate semestrele</option>
+        <option *ngFor="let s of semesters" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="summary-cards">
+    <div class="summary-card">
+      <span class="value">{{ filteredGrades.length }}</span>
+      <span class="label">Note afisate</span>
+    </div>
+    <div class="summary-card">
+      <span class="value">{{ getOverallAverage() | number: "1.2-2" }}</span>
+      <span class="label">Medie generala</span>
+    </div>
+    <div class="summary-card">
+      <span class="value">{{ getSubjectStats().length }}</span>
+      <span class="label">Materii</span>
+    </div>
+  </div>
+
+  <div class="table-container" *ngIf="filteredGrades.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Facultate</th>
+          <th>Materie</th>
+          <th>Semestru</th>
+          <th>Nota</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let g of filteredGrades">
+          <td>{{ g.studentName }}</td>
+          <td>{{ g.faculty }}</td>
+          <td>{{ g.subject }}</td>
+          <td>{{ g.semester }}</td>
+          <td>
+            <span
+              class="grade-badge"
+              [class.high]="g.grade >= 8"
+              [class.low]="g.grade < 5"
+            >
+              {{ g.grade }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="empty" *ngIf="filteredGrades.length === 0">Nicio nota gasita.</p>
+
+  <div class="stats-section" *ngIf="filteredGrades.length > 0">
+    <h3>Statistici per Materie</h3>
+    <div class="stats-grid">
+      <div class="stat-row" *ngFor="let s of getSubjectStats()">
+        <span class="subject-name">{{ s.subject }}</span>
+        <span class="stat-count"
+          >{{ s.count }} {{ s.count === 1 ? "nota" : "note" }}</span
+        >
+        <span
+          class="grade-badge"
+          [class.high]="s.avg >= 8"
+          [class.low]="s.avg < 5"
+        >
+          {{ s.avg | number: "1.1-1" }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

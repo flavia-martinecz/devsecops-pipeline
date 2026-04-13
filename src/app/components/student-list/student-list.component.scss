@@ -1,0 +1,118 @@
+.student-list {
+  padding: 1rem;
+}
+
+.table-container {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+th {
+  background: #2829c7;
+  color: white;
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+tr:hover td {
+  background: #f7fafc;
+}
+
+tr.selected td {
+  background: #ebf4ff;
+}
+
+.badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: #e2e8f0;
+
+  &.high {
+    background: #c6f6d5;
+    color: #276749;
+  }
+
+  &.low {
+    background: #fed7d7;
+    color: #9b2c2c;
+  }
+}
+
+.empty,
+.loading {
+  margin-top: 1rem;
+  color: #666;
+}
+
+.detail-card {
+  margin-top: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  h3 {
+    margin-bottom: 1rem;
+    color: #2829c7;
+  }
+}
+
+.grades-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.grade-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  .subject {
+    flex: 1;
+    font-weight: 500;
+  }
+}
+
+.grade-badge {
+  padding: 0.2rem 0.8rem;
+  border-radius: 6px;
+  font-weight: 700;
+  background: #e2e8f0;
+  min-width: 2rem;
+  text-align: center;
+
+  &.high {
+    background: #c6f6d5;
+    color: #276749;
+  }
+
+  &.low {
+    background: #fed7d7;
+    color: #9b2c2c;
+  }
+}
+
+.semester {
+  color: #999;
+  font-size: 0.85rem;
+}

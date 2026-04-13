@@ -1,0 +1,88 @@
+<div class="add-student">
+  <h2>Adauga Student Nou</h2>
+
+  <div class="page-layout">
+    <div class="form-side">
+      <div class="success-card" *ngIf="success">
+        <div>
+          <strong>{{ addedName }}</strong> a fost adaugat cu succes!
+          <div class="success-actions">
+            <button (click)="success = false">Adauga alt student</button>
+            <button class="secondary" (click)="goToList()">
+              Vezi lista studenti
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <form class="student-form" (ngSubmit)="onSubmit()" *ngIf="!success">
+        <div class="form-group">
+          <label for="name">Nume complet</label>
+          <input
+            id="name"
+            type="text"
+            [(ngModel)]="name"
+            name="name"
+            placeholder="ex: Ion Popescu"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email universitar</label>
+          <input
+            id="email"
+            type="email"
+            [(ngModel)]="email"
+            name="email"
+            placeholder="ex: ion.popescu@student.upt.ro"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="faculty">Facultate</label>
+          <select id="faculty" [(ngModel)]="faculty" name="faculty">
+            <option value="">-- Selecteaza facultatea --</option>
+            <option *ngFor="let f of faculties" [value]="f">{{ f }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="ciclu">Ciclu de studii</label>
+          <select
+            id="ciclu"
+            [(ngModel)]="ciclu"
+            name="ciclu"
+            (ngModelChange)="onCicluChange()"
+          >
+            <option value="">-- Selecteaza ciclul --</option>
+            <option value="Licenta">Licenta</option>
+            <option value="Masterat">Masterat</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="year">An de studiu</label>
+          <select id="year" [(ngModel)]="year" name="year">
+            <option [value]="1">Anul 1</option>
+            <option [value]="2">Anul 2</option>
+            <option *ngIf="ciclu !== 'Masterat'" [value]="3">Anul 3</option>
+            <option *ngIf="ciclu !== 'Masterat'" [value]="4">Anul 4</option>
+          </select>
+        </div>
+
+        <p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+        <div class="form-actions">
+          <button type="submit">Adauga Student</button>
+          <a routerLink="/students" class="cancel-link">Anuleaza</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="image-side">
+      <img src="assets/imgs/new_student.jpg" alt="Student nou" />
+    </div>
+  </div>
+</div>

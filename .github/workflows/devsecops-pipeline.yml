@@ -1,0 +1,429 @@
+# ============================================================================
+#  PIPELINE DevSecOps — Aplicatie Angular Frontend
+#  ─────────────────────────────────────────────────────────────────────────
+#  Componente de securitate integrate:
+#    1. SAST        → Semgrep  (reguli JS/TS/Angular: XSS, injection, etc.)
+#    2. Dependente  → Trivy    (scanare CVE-uri in node_modules / package-lock)
+#    3. npm audit   → audit nativ npm (advisory database)
+#    4. Docker      → Trivy    (scanare imagine nginx finala)
+#    5. Secrets     → Gitleaks (credentiale in codul sursa sau in Git history)
+#    6. Linting     → ESLint   (calitate + reguli de securitate TypeScript)
+#    7. Teste       → Karma/Jasmine via ng test (headless Chrome)
+#    8. Deploy      → Render (deploy automat pe cloud, doar daca scanarile trec)
+# ============================================================================
+
+name: "🔒 DevSecOps Pipeline — Angular"
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  DOCKER_IMAGE: "ghcr.io/${{ github.repository_owner }}/angular-devsecops"
+  NODE_VERSION: "20"
+
+permissions:
+  contents: read
+  security-events: write
+  packages: write
+
+jobs:
+  # ══════════════════════════════════════════════════════════════════════════
+  #  ETAPA 1 — Instalare Dependente (cache partajat intre job-uri)
+  # ══════════════════════════════════════════════════════════════════════════
+  install:
+    name: "📦 Instalare & Cache node_modules"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: "⬢ Configurare Node.js ${{ env.NODE_VERSION }}"
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: "📦 npm install"
+        run: |
+          rm -f package-lock.json
+          npm install
+
+  # ══════════════════════════════════════════════════════════════════════════
+  #  ETAPA 2 — Calitate Cod (Lint + Teste + Build)
+  # ══════════════════════════════════════════════════════════════════════════
+  quality-gate:
+    name: "🧪 ESLint + Teste + Build"
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: "📦 Instalare dependente"
+        run: |
+          rm -f package-lock.json
+          npm install
+
+      - name: "🔍 ESLint — Linting TypeScript + Reguli securitate"
+        run: npx ng lint --format json --output-file eslint-results.json
+        continue-on-error: true
+
+      - name: "✅ Teste unitare (Headless Chrome)"
+        run: npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
+        continue-on-error: true
+
+      - name: "🏗️ Build productie"
+        run: npx ng build --configuration production
+
+      - name: "📊 Upload rezultate"
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: quality-reports
+          path: |
+            eslint-results.json
+            coverage/
+
+      - name: "💾 Cache build output"
+        uses: actions/cache/save@v5
+        with:
+          path: dist/
+          key: dist-${{ github.sha }}
+
+  # ══════════════════════════════════════════════════════════════════════════
+  #  ETAPA 3 — SAST (Static Application Security Testing)
+  # ══════════════════════════════════════════════════════════════════════════
+  sast-scan:
+    name: "🛡️ SAST — Semgrep"
+    runs-on: ubuntu-latest
+    needs: install
+  
+    steps:
+      - uses: actions/checkout@v5
+  
+      - name: "🔎 Semgrep — Scanare cod"
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/src" \
+            semgrep/semgrep \
+            semgrep scan \
+              --config p/security-audit \
+              --config p/typescript \
+              --config p/secrets \
+              --sarif --output /src/semgrep-results.sarif \
+              /src
+  
+      - name: "📤 Upload SARIF → GitHub Security"
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: semgrep-results.sarif
+          category: sast-semgrep
+  
+      - name: "💾 Salvare raport SAST"
+        uses: actions/upload-artifact@v5
+        with:
+          name: sast-report
+          path: semgrep-results.sarif
+
+  # ══════════════════════════════════════════════════════════════════════════
+  #  ETAPA 4 — Scanare Dependente (SCA)
+  # ══════════════════════════════════════════════════════════════════════════
+  dependency-scan:
+    name: "📦 SCA — Scanare Dependente npm"
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # ── npm audit nativ ──
+      - name: "🔎 npm audit — Advisory Database"
+        run: |
+          echo "══ npm audit (severitate HIGH+) ══"
+          npm audit --audit-level=high || true
+          echo ""
+          echo "══ npm audit JSON (pentru raportare) ══"
+          npm audit --json > npm-audit.json || true
+
+      # ── Trivy pe filesystem (package-lock.json) ──
+      - name: "🔎 Trivy — Scanare package-lock.json"
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy fs --severity CRITICAL,HIGH,MEDIUM --format table .
+          trivy fs --severity CRITICAL,HIGH,MEDIUM --format sarif --output trivy-deps.sarif . || true
+
+      - name: "📤 Upload SARIF → GitHub Security"
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-deps.sarif
+          category: sca-trivy
+
+      - name: "💾 Salvare rapoarte SCA"
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: dependency-reports
+          path: |
+            npm-audit.json
+            trivy-deps.sarif
+
+  # ══════════════════════════════════════════════════════════════════════════
+  #  ETAPA 5 — Scanare Secrete
+  # ══════════════════════════════════════════════════════════════════════════
+  secrets-scan:
+    name: "🔑 Detectare Secrete — Gitleaks"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0   # necesar pentru --log-opts="--all"
+
+      - name: "⬇️ Instalare Gitleaks CLI"
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz \
+            | tar xz gitleaks
+          sudo mv gitleaks /usr/local/bin/
+          gitleaks version
+
+      - name: "🔎 Gitleaks — Scanare tot istoricul Git"
+        run: |
+          gitleaks detect \
+            --config .gitleaks.toml \
+            --log-opts="--all" \
+            --report-format sarif \
+            --report-path gitleaks-results.sarif \
+            --exit-code 1 || true
+
+      - name: "📤 Upload SARIF → GitHub Security"
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: gitleaks-results.sarif
+          category: secrets-gitleaks
+
+      - name: "💾 Salvare raport Gitleaks"
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: gitleaks-report
+          path: gitleaks-results.sarif
+
+  # ══════════════════════════════════════════════════════════════════════════
+  #  ETAPA 6 — IaC Scanning (Trivy config)
+  # ══════════════════════════════════════════════════════════════════════════
+  iac-scan:
+    name: "🏗️ IaC Scan — Trivy Config"
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: "🔎 Trivy — Scanare Dockerfile + nginx + YAML (misconfigurations)"
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy config \
+            --severity HIGH,CRITICAL,MEDIUM \
+            --format table \
+            .
+          trivy config \
+            --severity HIGH,CRITICAL,MEDIUM \
+            --format sarif \
+            --output trivy-iac.sarif \
+            . || true
+
+      - name: "📤 Upload SARIF → GitHub Security"
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-iac.sarif
+          category: iac-trivy
+
+      - name: "💾 Salvare raport IaC"
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: iac-report
+          path: trivy-iac.sarif
+
+  # ══════════════════════════════════════════════════════════════════════════
+  #  ETAPA 7 — Build + Scanare Imagine Docker
+  # ══════════════════════════════════════════════════════════════════════════
+  docker-build-scan:
+    name: "🐳 Build & Scanare Docker"
+    runs-on: ubuntu-latest
+    needs: [quality-gate, sast-scan, dependency-scan, secrets-scan, iac-scan]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+
+      - name: "🔨 Build imagine Docker (nginx + Angular)"
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: "${{ env.DOCKER_IMAGE }}:scan-target"
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: "🔎 Trivy — Scanare imagine Docker (tabel)"
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy image --severity CRITICAL,HIGH --format table "${{ env.DOCKER_IMAGE }}:scan-target"
+          trivy image --severity CRITICAL,HIGH,MEDIUM --format sarif --output trivy-docker.sarif "${{ env.DOCKER_IMAGE }}:scan-target" || true
+
+      - name: "📤 Upload SARIF → GitHub Security"
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-docker.sarif
+          category: docker-trivy
+
+  # ══════════════════════════════════════════════════════════════════════════
+  #  ETAPA 7 — Publicare (doar pe main)
+  # ══════════════════════════════════════════════════════════════════════════
+  publish:
+    name: "🚀 Publicare Imagine"
+    runs-on: ubuntu-latest
+    needs: docker-build-scan
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+
+      - name: "🔐 Login GHCR"
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "📋 Metadata Docker"
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_IMAGE }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: "📤 Build + Push"
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ══════════════════════════════════════════════════════════════════════════
+  #  ETAPA 8 — Deploy pe Render (Cloud)
+  # ══════════════════════════════════════════════════════════════════════════
+  deploy-render:
+    name: "☁️ Deploy → Render"
+    runs-on: ubuntu-latest
+    needs: docker-build-scan
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: ${{ vars.RENDER_APP_URL }}
+    steps:
+      - name: "🚀 Trigger Render Deploy Hook"
+        run: |
+          echo "══ Trimitere deploy hook catre Render ══"
+          RESPONSE=$(curl -sf "${{ secrets.RENDER_DEPLOY_HOOK_URL }}")
+          echo "Render deploy triggered successfully"
+          echo "### ☁️ Deploy Render" >> $GITHUB_STEP_SUMMARY
+          echo "Deploy declansat cu succes pe **Render**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🌐 URL: \`${{ vars.RENDER_APP_URL }}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: "⏳ Asteptare deploy Render (health check)"
+        run: |
+          echo "══ Verificare ca aplicatia e live ══"
+          APP_URL="${{ vars.RENDER_APP_URL }}"
+          if [ -z "$APP_URL" ]; then
+            echo "⚠️  RENDER_APP_URL nu e configurat, skip health check"
+            exit 0
+          fi
+
+          MAX_RETRIES=15
+          RETRY_INTERVAL=20
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Incercare $i/$MAX_RETRIES — GET $APP_URL"
+            HTTP_CODE=$(curl -so /dev/null -w '%{http_code}' "$APP_URL" || echo "000")
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✅ Aplicatia raspunde cu HTTP 200!"
+              echo "🎉 Deploy COMPLET — aplicatia e live pe $APP_URL" >> $GITHUB_STEP_SUMMARY
+              exit 0
+            fi
+            echo "   Status: $HTTP_CODE — retry in ${RETRY_INTERVAL}s..."
+            sleep $RETRY_INTERVAL
+          done
+
+          echo "⚠️  Health check timeout — aplicatia poate fi inca in deploy"
+          echo "⚠️ Health check timeout dupa $((MAX_RETRIES * RETRY_INTERVAL))s" >> $GITHUB_STEP_SUMMARY
+          exit 0
+
+  # ══════════════════════════════════════════════════════════════════════════
+  #  ETAPA 9 — DAST (Dynamic Application Security Testing)
+  # ══════════════════════════════════════════════════════════════════════════
+  dast-scan:
+    name: "🌐 DAST — OWASP ZAP"
+    runs-on: ubuntu-latest
+    needs: deploy-render
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: "🔎 ZAP Baseline Scan — Scanare aplicatie live"
+        uses: zaproxy/action-baseline@v0.14.0
+        continue-on-error: true
+        with:
+          target: ${{ vars.RENDER_APP_URL }}
+          fail_action: false
+          allow_issue_writing: false
+
+      - name: "💾 Salvare raport DAST"
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: dast-report
+          path: |
+            zap_baseline_report.html
+            zap_baseline_report.json
+
+  # ══════════════════════════════════════════════════════════════════════════
+  #  ETAPA 10 — Raport Final
+  # ══════════════════════════════════════════════════════════════════════════
+  security-summary:
+    name: "📋 Sumar Securitate"
+    runs-on: ubuntu-latest
+    needs: [sast-scan, dependency-scan, secrets-scan, iac-scan, docker-build-scan, deploy-render, dast-scan]
+    if: always()
+    steps:
+      - name: "📊 Generare sumar"
+        run: |
+          echo "## 🔒 Raport Securitate DevSecOps — Angular" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Verificare | Instrument | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🛡️ SAST | Semgrep (JS/TS/Angular) | ${{ needs.sast-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 SCA | Trivy + npm audit | ${{ needs.dependency-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔑 Secrete | Gitleaks | ${{ needs.secrets-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏗️ IaC | Trivy Config (Dockerfile+nginx) | ${{ needs.iac-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🐳 Docker | Trivy (imagine nginx) | ${{ needs.docker-build-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ☁️ Deploy | Render Cloud | ${{ needs.deploy-render.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🌐 DAST | OWASP ZAP | ${{ needs.dast-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📅 Data: $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY

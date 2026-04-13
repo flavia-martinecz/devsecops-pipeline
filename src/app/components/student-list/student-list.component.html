@@ -1,0 +1,73 @@
+<div class="student-list">
+  <h2>Lista Studentilor</h2>
+
+  <div class="table-container" *ngIf="students.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nume</th>
+          <th>Email</th>
+          <th>Facultate</th>
+          <th>An</th>
+          <th>Ciclu</th>
+          <th>Note</th>
+          <th>Media</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let s of students"
+          [class.selected]="selectedStudent?.id === s.id"
+          (click)="selectStudent(s)"
+        >
+          <td>{{ s.id }}</td>
+          <td>{{ s.name }}</td>
+          <td>{{ s.email }}</td>
+          <td>{{ s.faculty }}</td>
+          <td>{{ s.year }}</td>
+          <td>{{ s.ciclu }}</td>
+          <td>{{ getGradeCount(s.id) }}</td>
+          <td>
+            <span
+              class="badge"
+              [class.high]="getAverage(s.id) >= 8"
+              [class.low]="getAverage(s.id) < 5"
+            >
+              {{
+                getAverage(s.id) > 0
+                  ? (getAverage(s.id) | number: "1.1-1")
+                  : "-"
+              }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="detail-card" *ngIf="selectedStudent">
+    <h3>Note pentru {{ selectedStudent.name }}</h3>
+    <div class="grades-list" *ngIf="selectedGrades.length > 0">
+      <div class="grade-item" *ngFor="let g of selectedGrades">
+        <span class="subject">{{ g.subject }}</span>
+        <span
+          class="grade-badge"
+          [class.high]="g.grade >= 8"
+          [class.low]="g.grade < 5"
+        >
+          {{ g.grade }}
+        </span>
+        <span class="semester">{{ g.semester }}</span>
+      </div>
+    </div>
+    <p *ngIf="selectedGrades.length === 0" class="empty">
+      Nicio nota inregistrata.
+    </p>
+  </div>
+
+  <p *ngIf="students.length === 0 && !loading" class="empty">
+    Niciun student inregistrat.
+  </p>
+  <p *ngIf="loading" class="loading">Se incarca...</p>
+</div>

@@ -1,0 +1,40 @@
+<div class="search-page">
+  <h2>Cautare Studenti</h2>
+
+  <div class="search-box">
+    <input
+      type="text"
+      [(ngModel)]="searchQuery"
+      placeholder="Cauta dupa nume, facultate sau email..."
+      (keyup.enter)="onSearch()"
+    />
+    <button (click)="onSearch()">Cauta</button>
+  </div>
+
+  <div class="filter-tags">
+    <span class="tag" (click)="quickSearch('Automatica')">Automatica</span>
+    <span class="tag" (click)="quickSearch('Electronica')">Electronica</span>
+    <span class="tag" (click)="quickSearch('Mecanica')">Mecanica</span>
+    <span class="tag" (click)="quickSearch('Chimie')">Chimie</span>
+    <span class="tag" (click)="quickSearch('Constructii')">Constructii</span>
+  </div>
+
+  <p *ngIf="searched && results.length > 0" class="result-header">
+    Rezultate pentru: <strong>{{ searchQuery }}</strong> ({{ results.length }} gasite)
+  </p>
+
+  <div class="results" *ngIf="results.length > 0">
+    <div class="result-card" *ngFor="let s of results">
+      <div class="result-top">
+        <strong>{{ s.name }}</strong>
+        <span class="year-badge">Anul {{ s.year }}</span>
+      </div>
+      <span class="faculty">{{ s.faculty }}</span>
+      <small>{{ s.email }}</small>
+    </div>
+  </div>
+
+  <p *ngIf="searched && results.length === 0" class="no-results">
+    Niciun rezultat pentru "{{ searchQuery }}".
+  </p>
+</div>
