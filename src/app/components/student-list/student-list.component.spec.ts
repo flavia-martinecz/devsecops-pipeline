@@ -12,7 +12,11 @@ describe("StudentListComponent", () => {
     localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [StudentListComponent],
-      providers: [StudentService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        StudentService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(StudentListComponent);
@@ -43,7 +47,7 @@ describe("StudentListComponent", () => {
 
   it("should calculate average", () => {
     const avg = component.getAverage(1);
-    expect(avg).toBe(9.5); // (10 + 9) / 2
+    expect(avg).toBe(9.5);
   });
 
   it("should return 0 for student without grades", () => {
