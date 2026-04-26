@@ -400,7 +400,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: "ZAP Baseline Scan — Scanare aplicatie live"
-        uses: zaproxy/action-baseline@v0.14.0
+        uses: zaproxy/action-baseline@v0.15.0
         continue-on-error: true
         with:
           target: ${{ vars.RENDER_APP_URL }}
