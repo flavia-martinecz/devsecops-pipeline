@@ -39,8 +39,7 @@ Acest proiect demonstreaza securitatea aplicatiilor cloud pe mai multe niveluri:
 
 1. **Pipeline-ul ruleaza in cloud** — GitHub Actions porneste containere efemere
    pe servere Microsoft Azure la fiecare push
-2. **Imaginea Docker** este construita si scanata in cloud, publicata in GHCR,
-   apoi deployata pe Render
+2. **Imaginea Docker** este construita si scanata in cloud, apoi deployata pe Render
 3. **Supply Chain Security** — verific fiecare dependenta npm si fiecare pachet
    din imaginea Docker inainte sa ajunga in productie
 4. **Secretele in cloud** — Gitleaks previne expunerea accidentala de credentiale
@@ -122,12 +121,13 @@ In plus, **Trivy** si **npm audit** detecteaza CVE-uri in dependintele npm (Angu
 ## Structura proiectului
 
 ```
-angular-devsecops-pipeline/
+devsecops-pipeline/
 ├── .github/workflows/
 │   └── devsecops-pipeline.yml      ← Pipeline complet (10 etape)
 ├── .gitleaks.toml                  ← Configuratie secret scanning
 ├── nginx/
 │   ├── nginx.conf
+│   ├── default.conf
 │   └── default.conf.template
 ├── src/
 │   ├── app/
@@ -136,23 +136,30 @@ angular-devsecops-pipeline/
 │   │   │   ├── student-list/       ← Tabel studenti si note
 │   │   │   ├── student-search/     ← Cautare studenti
 │   │   │   ├── add-student/        ← Formular adaugare student
-│   │   │   ├── login/              ← Autentificare mock (VULN-5, VULN-7)
+│   │   │   ├── login/              ← Autentificare mock (consuma VULN-5, VULN-7)
 │   │   │   └── grades-report/      ← Raport note cu filtrare
 │   │   ├── models/
-│   │   │   └── student.model.ts    ← Interfete Student, Note, DashboardStats
+│   │   │   └── student.model.ts    ← Interfete Student, Grade, DashboardStats
 │   │   ├── services/
 │   │   │   ├── student.service.ts  ← HTTP service + VULN-1, 2, 3, 4
 │   │   │   └── auth.service.ts     ← Auth mock + VULN-5, VULN-7
 │   │   ├── app.component.ts
 │   │   └── app.routes.ts
+│   ├── environments/
+│   │   ├── environment.ts
+│   │   ├── environment.dev.ts      ← VULN-6 (RSA private key hardcodata)
+│   │   └── environment.prod.ts
+│   ├── assets/
 │   ├── index.html
-│   └── main.ts
+│   ├── main.ts
+│   └── styles.scss
 ├── Dockerfile                      ← Multi-stage build: node:20-alpine → nginx:1.27-alpine
 ├── render.yaml                     ← Render
 ├── angular.json                    ← Angular CLI config
 ├── eslint.config.js                ← ESLint + reguli securitate (no-eval, no-new-func)
 ├── karma.conf.js                   ← Karma (teste unitare)
 ├── tsconfig.json                   ← TypeScript strict mode
+├── SECURITY.md                     ← Politica de securitate + inventar instrumente
 └── package.json                    ← Angular 18.2, dependente npm
 ```
 

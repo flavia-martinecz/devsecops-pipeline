@@ -8,3 +8,6 @@ coverage/
 npm-debug.log*
 .vscode/
 .idea/
+
+docs/*
+!docs/pipeline-flow.mermaid

@@ -1,138 +1,52 @@
 flowchart TD
-    %% ═══════════════════════════════════════════
-    %%  DevSecOps Pipeline — Flux complet
-    %% ═══════════════════════════════════════════
-    Trigger[["push main/develop · PR main · workflow_dispatch"]]
+    Start(["👨‍💻 Dezvoltatorul face push pe GitHub"])
 
-    %% ETAPA 1 — Install
-    subgraph E1["ETAPA 1 · Instalare"]
-        direction TB
-        I1["actions/checkout@v5"]
-        I2["actions/setup-node@v5"]
-        I3["npm install (run)"]
-        I4["actions/cache/save@v5 — node_modules"]
-        I1 --> I2 --> I3 --> I4
-    end
+    Install["📦 1. Instalare<br/>Pregateste proiectul"]
 
-    %% ETAPA 2 — Quality
-    subgraph E2["ETAPA 2 · Calitate Cod (quality-gate)"]
-        direction TB
-        Q1["actions/checkout@v5"]
-        Q2["actions/setup-node@v5"]
-        Q3["actions/cache/restore@v5"]
-        Q4["npm install fallback (run)"]
-        Q5["ng lint — ESLint ⚠️ continue-on-error"]
-        Q6["ng test — Karma Headless ⚠️ continue-on-error"]
-        Q7["ng build production — BLOCANT"]
-        Q8["actions/upload-artifact@v5 — quality-reports"]
-        Q9["actions/cache/save@v5 — dist/"]
-        Q1 --> Q2 --> Q3 --> Q4 --> Q5 --> Q6 --> Q7 --> Q8 --> Q9
-    end
+    Quality["🧪 2. Calitate cod<br/>Verifica daca aplicatia<br/>se construieste si trece testele"]
+    SAST["🛡️ 3. SAST<br/>Cauta probleme<br/>in codul sursa"]
+    SCA["📚 4. Dependente<br/>Verifica librariile<br/>folosite (npm)"]
+    Secrets["🔑 5. Secrete<br/>Cauta parole sau chei<br/>uitate in cod"]
+    IaC["🏗️ 6. Configurari<br/>Verifica Dockerfile<br/>si fisiere de config"]
 
-    %% ETAPA 3 — SAST
-    subgraph E3["ETAPA 3 · SAST"]
-        direction TB
-        S1["actions/checkout@v5"]
-        S2["Semgrep (docker run) — p/security-audit, typescript, secrets"]
-        S3["github/codeql-action/upload-sarif@v4"]
-        S4["actions/upload-artifact@v5 — sast-report"]
-        S1 --> S2 --> S3 --> S4
-    end
+    Docker["🐳 7. Docker<br/>Construieste imaginea<br/>si o scaneaza"]
 
-    %% ETAPA 4 — SCA
-    subgraph E4["ETAPA 4 · SCA Dependente"]
-        direction TB
-        D1["actions/checkout@v5"]
-        D2["actions/setup-node@v5"]
-        D3["actions/cache/restore@v5"]
-        D4["npm audit (|| true)"]
-        D5["Trivy fs (|| true)"]
-        D6["github/codeql-action/upload-sarif@v4"]
-        D7["actions/upload-artifact@v5 — dependency-reports"]
-        D1 --> D2 --> D3 --> D4 --> D5 --> D6 --> D7
-    end
+    Publish["🚀 8. Publicare<br/>Salveaza imaginea<br/>in GitHub Registry"]
+    Deploy["☁️ 9. Deploy<br/>Lanseaza aplicatia<br/>pe Render.com"]
 
-    %% ETAPA 5 — Secrets
-    subgraph E5["ETAPA 5 · Secrete"]
-        direction TB
-        G1["actions/checkout@v5 fetch-depth:0"]
-        G2["Gitleaks install + scan (|| true)"]
-        G3["github/codeql-action/upload-sarif@v4"]
-        G4["actions/upload-artifact@v5 — gitleaks-report"]
-        G1 --> G2 --> G3 --> G4
-    end
+    DAST["🌐 10. DAST<br/>Testeaza aplicatia live<br/>ca un atacator real"]
 
-    %% ETAPA 6 — IaC
-    subgraph E6["ETAPA 6 · IaC Scan"]
-        direction TB
-        C1["actions/checkout@v5"]
-        C2["Trivy config (|| true)"]
-        C3["github/codeql-action/upload-sarif@v4"]
-        C4["actions/upload-artifact@v5 — iac-report"]
-        C1 --> C2 --> C3 --> C4
-    end
+    Live(["✅ Aplicatia este online<br/>si verificata"])
 
-    %% ETAPA 7 — Docker build + scan
-    subgraph E7["ETAPA 7 · Docker Build & Scan"]
-        direction TB
-        B1["actions/checkout@v5"]
-        B2["docker/setup-buildx-action@v3"]
-        B3["docker/build-push-action@v6 — load:true"]
-        B4["Trivy image (|| true)"]
-        B5["github/codeql-action/upload-sarif@v4"]
-        B1 --> B2 --> B3 --> B4 --> B5
-    end
+    Start --> Install
+    Install --> Quality
+    Install --> SAST
+    Install --> SCA
+    Install --> IaC
+    Start --> Secrets
 
-    %% ETAPA 8 — Publish
-    subgraph E8["ETAPA 8 · Publicare GHCR (doar main/push)"]
-        direction TB
-        P1["actions/checkout@v5"]
-        P2["docker/setup-buildx-action@v3"]
-        P3["docker/login-action@v3 — ghcr.io"]
-        P4["docker/metadata-action@v5"]
-        P5["docker/build-push-action@v6 — push:true"]
-        P1 --> P2 --> P3 --> P4 --> P5
-    end
+    Quality --> Docker
+    SAST --> Docker
+    SCA --> Docker
+    Secrets --> Docker
+    IaC --> Docker
 
-    %% ETAPA 9 — Deploy
-    subgraph E9["ETAPA 9 · Deploy Render (doar main/push)"]
-        direction TB
-        R1["curl Render Deploy Hook"]
-        R2["Health check HTTP 200 (exit 0 pe timeout)"]
-        R1 --> R2
-    end
+    Docker --> Publish
+    Docker --> Deploy
+    Deploy --> DAST
+    DAST --> Live
+    Publish --> Live
 
-    %% ETAPA 10 — DAST
-    subgraph E10["ETAPA 10 · DAST (doar main/push)"]
-        direction TB
-        Z1["zaproxy/action-baseline@v0.14.0 ⚠️ continue-on-error"]
-        Z2["actions/upload-artifact@v5 — dast-report"]
-        Z1 --> Z2
-    end
+    classDef startEnd fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000,font-weight:bold
+    classDef prep fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px,color:#000
+    classDef shiftLeft fill:#fff9c4,stroke:#f9a825,stroke-width:2px,color:#000
+    classDef build fill:#ffe0b2,stroke:#ef6c00,stroke-width:2px,color:#000
+    classDef deploy fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#000
+    classDef shiftRight fill:#ffccbc,stroke:#d84315,stroke-width:2px,color:#000
 
-    %% Flux dependente (needs)
-    Trigger --> E1
-    E1 --> E2
-    E1 --> E3
-    E1 --> E4
-    E1 --> E6
-    Trigger --> E5
-    E2 --> E7
-    E3 --> E7
-    E4 --> E7
-    E5 --> E7
-    E6 --> E7
-    E7 --> E8
-    E7 --> E9
-    E9 --> E10
-
-    %% Stilizare pass/fail
-    classDef blocking fill:#ffd6d6,stroke:#c0392b,stroke-width:2px,color:#000
-    classDef soft fill:#fff4c2,stroke:#b7950b,color:#000
-    classDef ok fill:#d6f5d6,stroke:#27ae60,color:#000
-    classDef neutral fill:#e8f0fe,stroke:#3b78e7,color:#000
-
-    class Q5,Q6,Z1 soft
-    class Q7 blocking
-    class I3,I4,Q3,Q4,Q8,Q9,S2,S3,S4,D4,D5,D6,D7,G2,G3,G4,C2,C3,C4,B3,B4,B5,P3,P4,P5,R1,R2,Z2 neutral
-    class I1,I2,Q1,Q2,S1,D1,D2,D3,G1,C1,B1,B2,P1,P2 ok
+    class Start,Live startEnd
+    class Install prep
+    class Quality,SAST,SCA,Secrets,IaC shiftLeft
+    class Docker build
+    class Publish,Deploy deploy
+    class DAST shiftRight
