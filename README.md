@@ -223,4 +223,4 @@ Repository → Actions → ultimul workflow run
 
 ## Licenta
 
-Proiect educational | UPT - Master SISC | Securitatea Aplicatiilor Cloud
+UPT - Master SISC | Securitatea Aplicatiilor Cloud
