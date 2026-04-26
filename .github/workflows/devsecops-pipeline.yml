@@ -278,7 +278,7 @@ jobs:
       - uses: docker/setup-buildx-action@v3
 
       - name: "Build imagine Docker (nginx + Angular)"
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: false
@@ -332,7 +332,7 @@ jobs:
             type=raw,value=latest
 
       - name: "Build + Push"
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
