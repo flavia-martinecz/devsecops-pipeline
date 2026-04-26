@@ -14,7 +14,7 @@ COPY . .
 RUN npx ng build --configuration production
 
 # Runtime
-FROM nginx:1.27-alpine AS runtime
+FROM nginx:1.29-alpine AS runtime
 
 LABEL org.opencontainers.image.title="Student Portal Angular" \
     org.opencontainers.image.description="Portal studenti Angular servit cu nginx"
