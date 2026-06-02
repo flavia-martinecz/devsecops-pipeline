@@ -407,7 +407,6 @@ jobs:
           target: ${{ vars.RENDER_APP_URL }}
           fail_action: false
           allow_issue_writing: false
-          cmd_options: '-r zap_baseline_report.html -J zap_baseline_report.json'
 
       - name: "Salvare raport DAST"
         if: always()
