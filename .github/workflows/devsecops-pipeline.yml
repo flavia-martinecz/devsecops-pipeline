@@ -21,7 +21,7 @@ jobs:
   #  ETAPA 1 — Instalare Dependente
   # ══════════════════════════════════════════════════════════════════════════
   install:
-    name: "📦 Instalare"
+    name: "Instalare"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -47,7 +47,7 @@ jobs:
   #  ETAPA 2 — Calitate Cod
   # ══════════════════════════════════════════════════════════════════════════
   quality-gate:
-    name: "🧪 ESLint + Teste + Build"
+    name: "ESLint + Teste + Build"
     runs-on: ubuntu-latest
     needs: install
     steps:
@@ -100,7 +100,7 @@ jobs:
   #  ETAPA 3 — SAST
   # ══════════════════════════════════════════════════════════════════════════
   sast-scan:
-    name: "🛡️ SAST - Semgrep"
+    name: "SAST - Semgrep"
     runs-on: ubuntu-latest
     needs: install
 
@@ -135,7 +135,7 @@ jobs:
   #  ETAPA 4 — Scanare Dependente (SCA)
   # ══════════════════════════════════════════════════════════════════════════
   dependency-scan:
-    name: "📦 SCA - Dependente npm"
+    name: "SCA - Dependente npm"
     runs-on: ubuntu-latest
     needs: install
     steps:
@@ -192,7 +192,7 @@ jobs:
   #  ETAPA 5 — Scanare Secrete
   # ══════════════════════════════════════════════════════════════════════════
   secrets-scan:
-    name: "🔑 Detectare Secrete - Gitleaks"
+    name: "Detectare Secrete - Gitleaks"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -233,7 +233,7 @@ jobs:
   #  ETAPA 6 — IaC Scanning (Trivy config)
   # ══════════════════════════════════════════════════════════════════════════
   iac-scan:
-    name: "🏗️ IaC Scan - Trivy"
+    name: "IaC Scan - Trivy"
     runs-on: ubuntu-latest
     needs: install
     steps:
@@ -270,7 +270,7 @@ jobs:
   #  ETAPA 7 — Build + Scanare Imagine Docker
   # ══════════════════════════════════════════════════════════════════════════
   docker-build-scan:
-    name: "🐳 Docker"
+    name: "Docker"
     runs-on: ubuntu-latest
     needs: [quality-gate, sast-scan, dependency-scan, secrets-scan, iac-scan]
     steps:
@@ -304,7 +304,7 @@ jobs:
   #  ETAPA 8 — Publicare
   # ══════════════════════════════════════════════════════════════════════════
   publish:
-    name: "🚀 Publicare Imagine"
+    name: "Publicare Imagine"
     runs-on: ubuntu-latest
     needs: docker-build-scan
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -345,7 +345,7 @@ jobs:
   #  ETAPA 9 — Deploy pe Render
   # ══════════════════════════════════════════════════════════════════════════
   deploy-render:
-    name: "☁️ Deploy"
+    name: "Deploy"
     runs-on: ubuntu-latest
     needs: docker-build-scan
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -394,7 +394,7 @@ jobs:
   #  ETAPA 10 — DAST
   # ══════════════════════════════════════════════════════════════════════════
   dast-scan:
-    name: "🌐 DAST - OWASP ZAP"
+    name: "DAST - OWASP ZAP"
     runs-on: ubuntu-latest
     needs: deploy-render
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
