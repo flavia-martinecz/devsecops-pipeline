@@ -404,13 +404,13 @@ jobs:
       id-token: write
     steps:
       - name: "ZAP Baseline Scan — Scanare aplicatie live"
-        uses: zaproxy/action-baseline@v0.13.0
+        uses: zaproxy/action-baseline@v0.10.0
         continue-on-error: true
         with:
           target: ${{ vars.RENDER_APP_URL }}
           fail_action: false
           allow_issue_writing: false
-          artifact_name: 'zap-scan-report'
+          artifact_name: 'none'
 
       - name: "Salvare raport DAST"
         if: always()
