@@ -407,6 +407,7 @@ jobs:
           target: ${{ vars.RENDER_APP_URL }}
           fail_action: false
           allow_issue_writing: false
+          artifact_name: 'zap-scan-report'
 
       - name: "Salvare raport DAST"
         if: always()
