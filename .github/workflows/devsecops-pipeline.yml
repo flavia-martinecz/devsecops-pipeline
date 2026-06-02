@@ -399,6 +399,9 @@ jobs:
     needs: deploy-render
     environment: production
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: "ZAP Baseline Scan — Scanare aplicatie live"
         uses: zaproxy/action-baseline@v0.13.0
