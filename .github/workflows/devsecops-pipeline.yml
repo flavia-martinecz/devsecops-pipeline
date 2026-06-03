@@ -402,7 +402,8 @@ jobs:
     steps:
       - name: "ZAP Baseline Scan — Scanare aplicatie live"
         run: |
-          docker run -v ${{ github.workspace }}:/zap/wrk/:rw \
+          docker run --user $(id -u):$(id -g) \
+            -v ${{ github.workspace }}:/zap/wrk/:rw \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
             -t ${{ vars.RENDER_APP_URL }} \
