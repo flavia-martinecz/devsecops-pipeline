@@ -1,35 +1,49 @@
 # Pipeline DevSecOps
 
+**Flavia Martinecz**
+**UPT - Master SISC - Securitatea Aplicatiilor Cloud**
+
 ## Tema practica SAC
 
 **6. Pipeline DevSecOps de Baza**
 
-Configureaza un pipeline CI/CD (GitHub Actions) care include SAST, scanare dependente si scanare imagini Docker. Tenta personala: Studentul integreaza pipeline-ul pe un proiect personal sau de la facultate.
+Configureaza un pipeline CI/CD (GitHub Actions) care include SAST, scanare dependente si scanare imagini Docker.
+Tenta personala: Studentul integreaza pipeline-ul pe un proiect personal sau de la facultate.
+
+---
 
 ## Despre proiect
 
-Pipeline CI/CD cu GitHub Actions care integreaza verificari de securitate
-automate pe o aplicatie front-end, Portal Studenti - UPT, dezvoltata cu framework-ul Angular v.18, cu deploy automat pe Render.com
-doar dupa ce toate scanarile de securitate trec cu succes.
+Am configurat un pipeline CI/CD cu GitHub Actions care integreaza verificari de securitate automate pe o aplicatie front-end, un Portal Studenti - UPT, dezvoltata cu framework-ul Angular v.18, cu deploy automat pe Render.com dupa ce toate scanarile de securitate trec cu succes.
 
 ```
 
-PIPELINE DevSecOps — (10 etape)
+**PIPELINE DevSecOps — GitHub Actions** (10 etape)
 
   push → install ──┬── quality-gate    (ESLint + Karma + ng build)
                    ├── SAST            (Semgrep)
                    ├── SCA             (Trivy + npm)
                    └── IaC             (Trivy config)
 
-      secrets-scan (Gitleaks) ── ruleaza independent ──┐
-                                                       │
-      Docker-build-scan ◄── asteapta TOATE 5 ──────────┘
-                 │
-      Publish + Deploy - Render (https://student-portal.onrender.com)
-                 │
-      DAST - OWASP ZAP
+         secrets-scan (Gitleaks) ── ruleaza independent ──┐
+                                                          │
+         Docker-build-scan ◄── asteapta TOATE 5 ──────────┘
+                  │
+         Publish + Deploy - Render
+                  │
+         DAST - OWASP ZAP
 
 ```
+
+**Secret scanning** - Gitleaks scaneaza tot istoricul Git ca sa prinda parole sau chei API comise accidental. 
+
+Pentru **SAST - Static Application Security Testing** am folosit Semgrep, care analizeaza codul sursa fara sa-l ruleze si cauta pattern-uri de vulnerabilitati cunoscute, cum ar fi eval, XSS sau injection.
+
+Pentru **SCA - Software Composition Analysis sau scanarea dependentelor** am folosit doua instrumente: Trivy si npm audit, care verifica daca bibliotecile pe care le folosesc au vulnerabilitati cunoscute, adica CVE-uri.
+
+**Docker** este tehnologia care impacheteaza aplicatia intr-o singura imagine portabila. Dupa ce construiesc imaginea, o scanez cu Trivy. Trivy verifica toate pachetele din sistemul de operare al imaginii si imi spune daca vreunul are vulnerabilitati cunoscute. 
+
+**DAST - Dynamic Application Security Testing** (Testare Dinamica a Securitatii Aplicatiei). Testeaza aplicatia in timp ce ruleaza, atacand-o din exterior ca un hacker real, fara sa se uite la codul sursa.
 
 ---
 
@@ -37,24 +51,19 @@ PIPELINE DevSecOps — (10 etape)
 
 Acest proiect demonstreaza securitatea aplicatiilor cloud pe mai multe niveluri:
 
-1. **Pipeline-ul ruleaza in cloud** — GitHub Actions porneste containere efemere
-   pe servere Microsoft Azure la fiecare push
+1. **Pipeline-ul ruleaza in cloud** — GitHub Actions porneste containere pe servere Microsoft Azure la fiecare push
 2. **Imaginea Docker** este construita si scanata in cloud, apoi deployata pe Render
-3. **Supply Chain Security** — verific fiecare dependenta npm si fiecare pachet
-   din imaginea Docker inainte sa ajunga in productie
-4. **Secretele in cloud** — Gitleaks previne expunerea accidentala de credentiale
-   in cod care e hostat public pe GitHub
+3. **Supply Chain Security** — verific fiecare dependenta npm si fiecare pachet din imaginea Docker inainte sa ajunga in productie
+4. **Secretele in cloud** — Gitleaks previne expunerea accidentala de credentiale in cod care e hostat public pe GitHub
 
 ---
 
 ## Shift-Left vs Shift-Right
 
-In securitatea software traditionala, testarea se facea dupa deploy.
+In securitatea software traditionala, testarea se facea dupa deploy. **DevSecOps** muta verificarile **cat mai devreme** in pipeline, aceasta abordare se numeste **Shift-Left**.
 
-**DevSecOps** muta verificarile **cat mai devreme** in pipeline, aceasta abordare se numeste **Shift-Left**.
-
-**Shift-Left** = gaseste vulnerabilitati **inainte** sa ajunga in productie (in cod, dependente, config).
-
+Cele doua concepte importante sunt:
+**Shift-Left** = gaseste vulnerabilitati **inainte** sa ajunga in productie (in cod, dependente, configurari).
 **Shift-Right** = testeaza aplicatia **dupa deploy**, pe mediul live, asa cum o vede un atacator real.
 
 ```
@@ -80,7 +89,6 @@ combina ambele abordari pentru acoperire completa.
 ### Shift-Left
 
 Aceste scanari ruleaza la fiecare push/PR, pe codul sursa, dependente si configurari.
-Daca gasesc probleme, deploy-ul este blocat automat.
 
 |     | Componenta | Instrument        | Ce Scaneaza                                  | Ce Gaseste                                |
 | --- | ---------- | ----------------- | -------------------------------------------- | ----------------------------------------- |
@@ -113,8 +121,6 @@ fiecare detectata de un scanner din pipeline:
 | VULN-5 | JWT token hardcodat        | `auth.service.ts`    | CWE-798 | Semgrep           |
 | VULN-6 | RSA private key hardcodata | `environment.dev.ts` | CWE-321 | Gitleaks          |
 | VULN-7 | Parola admin hardcodata    | `auth.service.ts`    | CWE-798 | Semgrep           |
-
-In plus, **Trivy** si **npm audit** detecteaza CVE-uri in dependintele npm (Angular 18, zone.js etc.).
 
 ---
 
@@ -167,16 +173,16 @@ devsecops-pipeline/
 
 ## GitHub
 
-### Security → Code scanning alerts
+### Security
 
 ```
-Repository → Security (tab) → Code scanning
+Repository → Security and quality
 ```
 
 Apar rezultatele SARIF incarcate de pipeline:
 
 - **Semgrep** (`sast-semgrep`) — secrets hardcodate in codul TypeScript (API key, JWT token, parola admin)
-- **Trivy fs** (`sca-trivy`) — CVE-uri din dependentele npm
+- **Trivy filesystem scan** (`sca-trivy`) — CVE-uri din dependentele npm
 - **Trivy config** (`iac-trivy`) — misconfigurari in Dockerfile, nginx, YAML configs
 - **Trivy image** (`docker-trivy`) — CVE-uri din pachetele imaginii Docker nginx:1.27-alpine
 - **Gitleaks** (`secrets-gitleaks`) — secrete expuse (API key, GitHub PAT, RSA private key) in codul sursa si istoricul Git
@@ -184,23 +190,25 @@ Apar rezultatele SARIF incarcate de pipeline:
 Fiecare alerta arata fisierul, linia, severitatea (Critical/High/Medium/Low) si
 recomandarea de remediere.
 
-### Security → Secret scanning
+### Actions
 
 ```
-Repository → Security (tab) → Secret scanning
-```
-
-GitHub Secret Scanning nativ detecteaza automat tokeni si chei expuse la fiecare push.
-
-### Actions — Logs si artefacte
-
-```
-Repository → Actions → ultimul workflow run
+Repository → Actions
 ```
 
 - Status fiecare job (verde = succes, rosu = esec)
 - Log-uri detaliate per step
-- Artefacte generate: `sast-report`, `dependency-reports`, `gitleaks-report`, `iac-report`, `zap_scan`, `quality-reports`
+- Artefacte generate: `sast-report`, `dependency-reports`, `gitleaks-report`, `iac-report`, `dast-report`, `quality-reports`
+
+### Issues
+
+```
+Repository → Issues
+```
+
+Pentru fiecare vulnerabilitate relevanta detectata de unelte (Semgrep, Gitleaks, Trivy, etc.) se creeaza manual un issue de remediere, conectat la finding-ul corespunzator din tab-ul Security.
+
+Issue-ul contine descrierea problemei, severitatea, fisierul si linia afectata, plus pasii de remediere. Poate fi atribuit unui responsabil si urmarit pana la rezolvare.
 
 ---
 
@@ -216,8 +224,7 @@ Repository → Actions → ultimul workflow run
 | [ESLint](https://eslint.org)                                   | Linting + reguli securitate (no-eval etc.)       | Gratuit             |
 | [Karma](https://karma-runner.github.io)                        | Teste unitare                                    | Gratuit             |
 | [GitHub Actions](https://github.com/features/actions)          | CI/CD (10 etape automate)                        | Gratuit             |
-| [GHCR](https://ghcr.io)                                        | Container Registry                               | Gratuit             |
-| [Render](https://render.com)                                   | Cloud Deploy PaaS                                | Gratuit (free tier) |
+| [Render](https://render.com)                                   | Cloud Deploy PaaS                                | Gratuit             |
 
 ---
 
