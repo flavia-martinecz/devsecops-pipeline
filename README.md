@@ -66,8 +66,8 @@ Acest proiect demonstreaza securitatea aplicatiilor cloud pe mai multe niveluri:
 
 In securitatea software traditionala, testarea se facea dupa deploy. **DevSecOps** muta verificarile **cat mai devreme** in pipeline, aceasta abordare se numeste **Shift-Left**.
 
-Cele doua concepte importante sunt:
-**Shift-Left** = gaseste vulnerabilitati **inainte** sa ajunga in productie (in cod, dependente, configurari).
+Cele doua concepte importante sunt:<br>
+**Shift-Left** = gaseste vulnerabilitati **inainte** sa ajunga in productie (in cod, dependente, configurari).<br>
 **Shift-Right** = testeaza aplicatia **dupa deploy**, pe mediul live, asa cum o vede un atacator real.
 
 ```
@@ -211,7 +211,7 @@ Repository → Actions
 Repository → Issues
 ```
 
-Pentru fiecare vulnerabilitate relevanta detectata de unelte (Semgrep, Gitleaks, Trivy, etc.) se creeaza manual un issue de remediere, conectat la finding-ul corespunzator din tab-ul Security.
+Pentru fiecare vulnerabilitate relevanta detectata de tool-urile (Semgrep, Gitleaks, Trivy, etc.) se creeaza manual un issue de remediere, conectat la finding-ul corespunzator din tab-ul Security.
 
 Issue-ul contine descrierea problemei, severitatea, fisierul si linia afectata, plus pasii de remediere. Poate fi atribuit unui responsabil si urmarit pana la rezolvare.
 
