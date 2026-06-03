@@ -1,13 +1,13 @@
 # Pipeline DevSecOps
 
-**Flavia Martinecz**
+**Flavia Martinecz**<br>
 **UPT - Master SISC - Securitatea Aplicatiilor Cloud**
 
-## Tema practica SAC
+## Tema practica
 
 **6. Pipeline DevSecOps de Baza**
 
-Configureaza un pipeline CI/CD (GitHub Actions) care include SAST, scanare dependente si scanare imagini Docker.
+Configureaza un pipeline CI/CD (GitHub Actions) care include SAST, scanare dependente si scanare imagini Docker.<br>
 Tenta personala: Studentul integreaza pipeline-ul pe un proiect personal sau de la facultate.
 
 ---
@@ -18,7 +18,7 @@ Am configurat un pipeline CI/CD cu GitHub Actions care integreaza verificari de 
 
 ```
 
-**PIPELINE DevSecOps — GitHub Actions** (10 etape)
+PIPELINE DevSecOps — GitHub Actions (10 etape)
 
   push → install ──┬── quality-gate    (ESLint + Karma + ng build)
                    ├── SAST            (Semgrep)
@@ -28,22 +28,26 @@ Am configurat un pipeline CI/CD cu GitHub Actions care integreaza verificari de 
          secrets-scan (Gitleaks) ── ruleaza independent ──┐
                                                           │
          Docker-build-scan ◄── asteapta TOATE 5 ──────────┘
-                  │
-         Publish + Deploy - Render
-                  │
-         DAST - OWASP ZAP
+            │         │
+         Publish   Deploy - Render
+                      │
+                   DAST - OWASP ZAP
 
 ```
 
 **Secret scanning** - Gitleaks scaneaza tot istoricul Git ca sa prinda parole sau chei API comise accidental. 
 
-Pentru **SAST - Static Application Security Testing** am folosit Semgrep, care analizeaza codul sursa fara sa-l ruleze si cauta pattern-uri de vulnerabilitati cunoscute, cum ar fi eval, XSS sau injection.
+**Quality Gate** - ESLint, Karma si ng build verifica daca codul respecta standardele de calitate, testele trec si aplicatia compileaza corect inainte de orice alta etapa.
 
-Pentru **SCA - Software Composition Analysis sau scanarea dependentelor** am folosit doua instrumente: Trivy si npm audit, care verifica daca bibliotecile pe care le folosesc au vulnerabilitati cunoscute, adica CVE-uri.
+**SAST - Static Application Security Testing** - Semgrep, care analizeaza codul sursa fara sa-l ruleze si cauta pattern-uri de vulnerabilitati cunoscute, cum ar fi eval, XSS sau injection.
+
+**SCA - Software Composition Analysis sau scanarea dependentelor** am folosit doua instrumente: Trivy si npm audit, care verifica daca bibliotecile pe care le folosesc au vulnerabilitati cunoscute, adica CVE-uri.
+
+**IaC** - Infrastructure as Code - Trivy scaneaza fisierele de configurare ale infrastructurii pentru a detecta setari gresite care ar putea expune sistemul la atacuri.
 
 **Docker** este tehnologia care impacheteaza aplicatia intr-o singura imagine portabila. Dupa ce construiesc imaginea, o scanez cu Trivy. Trivy verifica toate pachetele din sistemul de operare al imaginii si imi spune daca vreunul are vulnerabilitati cunoscute. 
 
-**DAST - Dynamic Application Security Testing** (Testare Dinamica a Securitatii Aplicatiei). Testeaza aplicatia in timp ce ruleaza, atacand-o din exterior ca un hacker real, fara sa se uite la codul sursa.
+**DAST - Dynamic Application Security Testing** - Testeaza aplicatia in timp ce ruleaza, atacand-o din exterior ca un hacker real, fara sa se uite la codul sursa.
 
 ---
 
@@ -103,9 +107,9 @@ Aceste scanari ruleaza la fiecare push/PR, pe codul sursa, dependente si configu
 
 Aceasta scanare ruleaza pe aplicatia live deployata pe Render, simuland un atacator extern.
 
-|     | Componenta | Instrument | Ce Scaneaza                       | Ce Gaseste                                 |
-| --- | ---------- | ---------- | --------------------------------- | ------------------------------------------ |
-| 7   | DAST       | OWASP ZAP  | Aplicatia live pe Render (HTTP/S) | XSS reflectat, headers lipsa, clickjacking |
+|     | Componenta | Instrument | Ce Scaneaza                       | Ce Gaseste                               |
+| --- | ---------- | ---------- | --------------------------------- | ---------------------------------------- |
+| 7   | DAST       | OWASP ZAP  | Aplicatia live pe Render (HTTP/S) | XSS - Cross-Site Scripting, clickjacking |
 
 ### Vulnerabilitati plantate
 
@@ -117,7 +121,7 @@ fiecare detectata de un scanner din pipeline:
 | VULN-1 | Hardcoded API Key          | `student.service.ts` | CWE-798 | Gitleaks, Semgrep |
 | VULN-2 | `new Function()` pe input  | `student.service.ts` | CWE-94  | ESLint            |
 | VULN-3 | `eval()` pe date externe   | `student.service.ts` | CWE-94  | ESLint            |
-| VULN-4 | GitHub PAT hardcodat       | `student.service.ts` | CWE-798 | Gitleaks          |
+| VULN-4 | GitHub PA Token hardcodat  | `student.service.ts` | CWE-798 | Gitleaks          |
 | VULN-5 | JWT token hardcodat        | `auth.service.ts`    | CWE-798 | Semgrep           |
 | VULN-6 | RSA private key hardcodata | `environment.dev.ts` | CWE-321 | Gitleaks          |
 | VULN-7 | Parola admin hardcodata    | `auth.service.ts`    | CWE-798 | Semgrep           |
@@ -198,7 +202,8 @@ Repository → Actions
 
 - Status fiecare job (verde = succes, rosu = esec)
 - Log-uri detaliate per step
-- Artefacte generate: `sast-report`, `dependency-reports`, `gitleaks-report`, `iac-report`, `dast-report`, `quality-reports`
+- Artefacte generate:<br>
+`sast-report`, `dependency-reports`, `gitleaks-report`, `iac-report`, `dast-report`, `quality-reports`
 
 ### Issues
 
