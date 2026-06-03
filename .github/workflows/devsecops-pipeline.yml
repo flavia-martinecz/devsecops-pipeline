@@ -400,20 +400,18 @@ jobs:
     environment: production
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
+      - name: "Pregatire workspace"
+        run: chmod 777 ${{ github.workspace }}
+
       - name: "ZAP Baseline Scan — Scanare aplicatie live"
         run: |
-          docker run --user $(id -u):$(id -g) \
-            -v ${{ github.workspace }}:/zap/wrk/:rw \
+          docker run -v ${{ github.workspace }}:/zap/wrk/:rw \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
             -t ${{ vars.RENDER_APP_URL }} \
             -r zap_baseline_report.html \
             -J zap_baseline_report.json \
             || true
-
-      - name: "Permisiuni fisiere"
-        if: always()
-        run: sudo chown -R $USER:$USER ${{ github.workspace }}
 
       - name: "Salvare raport DAST"
         if: always()
