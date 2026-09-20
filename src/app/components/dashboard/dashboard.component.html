@@ -4,15 +4,15 @@
   <div class="stats-grid" *ngIf="stats">
     <div class="stat-card">
       <span class="stat-value">{{ stats.totalStudents }}</span>
-      <span class="stat-label">Studenti inregistrati</span>
+      <span class="stat-label">Registered students</span>
     </div>
     <div class="stat-card">
       <span class="stat-value">{{ stats.totalGrades }}</span>
-      <span class="stat-label">Note inregistrate</span>
+      <span class="stat-label">Recorded grades</span>
     </div>
     <div class="stat-card">
       <span class="stat-value">{{ stats.averageGrade | number: "1.2-2" }}</span>
-      <span class="stat-label">Media generala</span>
+      <span class="stat-label">Overall average</span>
     </div>
   </div>
 

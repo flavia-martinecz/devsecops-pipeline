@@ -9,5 +9,5 @@ import { RouterOutlet, RouterLinkActive, RouterLink } from "@angular/router";
   styleUrls: ["./app.component.scss"],
 })
 export class AppComponent {
-  title = "Portal Studenti";
+  title = "Student Portal";
 }

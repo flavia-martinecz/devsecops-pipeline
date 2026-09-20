@@ -17,7 +17,7 @@ RUN npx ng build --configuration production
 FROM nginx:1.27-alpine AS runtime
 
 LABEL org.opencontainers.image.title="Student Portal Angular" \
-    org.opencontainers.image.description="Portal studenti Angular servit cu nginx"
+    org.opencontainers.image.description="Angular student portal served with nginx"
 
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template

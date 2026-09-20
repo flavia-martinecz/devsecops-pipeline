@@ -1,7 +1,7 @@
 {
   "name": "student-portal-angular",
   "version": "1.0.0",
-  "description": "Portal studenti Angular — proiect demo DevSecOps",
+  "description": "Angular student portal — DevSecOps demo project",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

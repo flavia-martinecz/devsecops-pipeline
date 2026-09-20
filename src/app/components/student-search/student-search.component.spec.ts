@@ -44,7 +44,7 @@ describe("StudentSearchComponent", () => {
   });
 
   it("should find students by faculty", () => {
-    component.searchQuery = "Automatica";
+    component.searchQuery = "Automation";
     component.onSearch();
     expect(component.results.length).toBe(5);
   });
@@ -57,8 +57,8 @@ describe("StudentSearchComponent", () => {
   });
 
   it("should quick search by tag", () => {
-    component.quickSearch("Mecanica");
-    expect(component.searchQuery).toBe("Mecanica");
+    component.quickSearch("Mechanical");
+    expect(component.searchQuery).toBe("Mechanical");
     expect(component.results.length).toBe(1);
   });
 });

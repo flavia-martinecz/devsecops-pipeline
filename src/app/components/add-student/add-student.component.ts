@@ -16,18 +16,18 @@ export class AddStudentComponent {
   email = "";
   faculty = "";
   year: number = 1;
-  ciclu: "Licenta" | "Masterat" | "" = "";
+  cycle: "Bachelor" | "Master" | "" = "";
 
   success = false;
   addedName = "";
   errorMsg = "";
 
   faculties = [
-    "Automatica si Calculatoare",
-    "Electronica si Telecomunicatii",
-    "Mecanica",
-    "Constructii",
-    "Chimie",
+    "Automation and Computers",
+    "Electronics and Telecommunications",
+    "Mechanical Engineering",
+    "Civil Engineering",
+    "Chemistry",
   ];
 
   constructor(
@@ -41,9 +41,9 @@ export class AddStudentComponent {
       !this.name.trim() ||
       !this.email.trim() ||
       !this.faculty ||
-      !this.ciclu
+      !this.cycle
     ) {
-      this.errorMsg = "Toate campurile sunt obligatorii.";
+      this.errorMsg = "All fields are required.";
       return;
     }
 
@@ -53,7 +53,7 @@ export class AddStudentComponent {
         email: this.email.trim(),
         faculty: this.faculty,
         year: this.year,
-        ciclu: this.ciclu as "Licenta" | "Masterat",
+        cycle: this.cycle as "Bachelor" | "Master",
       })
       .subscribe({
         next: (student) => {
@@ -63,13 +63,13 @@ export class AddStudentComponent {
           this.email = "";
           this.faculty = "";
           this.year = 1;
-          this.ciclu = "";
+          this.cycle = "";
         },
       });
   }
 
-  onCicluChange(): void {
-    if (this.ciclu === "Masterat" && this.year > 2) {
+  onCycleChange(): void {
+    if (this.cycle === "Master" && this.year > 2) {
       this.year = 1;
     }
   }

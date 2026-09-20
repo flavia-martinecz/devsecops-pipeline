@@ -4,7 +4,7 @@ export interface Student {
   email: string;
   faculty: string;
   year: number;
-  ciclu: 'Licenta' | 'Masterat';
+  cycle: 'Bachelor' | 'Master';
   enrolledAt?: string;
 }
 

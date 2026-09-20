@@ -1,10 +1,10 @@
-title = "Configurare Gitleaks — Angular DevSecOps"
+title = "Gitleaks Configuration — Angular DevSecOps"
 
 [extend]
   useDefault = true
 
 [allowlist]
-  description = "Exceptii minime"
+  description = "Minimal exceptions"
   paths = [
     '''\.gitleaks\.toml''',
     '''README\.md''',

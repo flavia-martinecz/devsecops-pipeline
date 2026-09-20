@@ -1,49 +1,49 @@
 # Security Policy
 
-## Versiuni suportate
+## Supported versions
 
-| Versiune | Suportata |
+| Version  | Supported |
 | -------- | --------- |
-| 1.x      | Da        |
+| 1.x      | Yes       |
 
-## Raportare vulnerabilitati
+## Reporting vulnerabilities
 
-Daca descoperi o vulnerabilitate in cod, deschide un **GitHub Issue** cu eticheta `security`.
+If you discover a vulnerability in the code, open a **GitHub Issue** with the `security` label.
 
-## Instrumente de securitate active
+## Active security tools
 
-Acest repository are urmatoarele mecanisme de securitate automate,
-integrate in pipeline-ul CI/CD (GitHub Actions):
+This repository has the following automated security mechanisms,
+integrated into the CI/CD pipeline (GitHub Actions):
 
 ### Shift-Left
 
-| Instrument        | Tip scanare | Ce detecteaza                                    | Frecventa          |
+| Tool              | Scan type   | What it detects                                  | Frequency          |
 | ----------------- | ----------- | ------------------------------------------------ | ------------------ |
-| **ESLint**        | Linting     | `eval()`, `new Function()`, `no-script-url`      | La fiecare push/PR |
-| **Karma/Jasmine** | Teste       | Regresii functionale (29 teste unitare, Chrome)  | La fiecare push/PR |
-| **Semgrep**       | SAST        | Secrets hardcodate, XSS, injection in cod TS     | La fiecare push/PR |
-| **Trivy fs**      | SCA         | CVE-uri in dependente npm (package-lock.json)    | La fiecare push/PR |
-| **npm audit**     | SCA         | Advisory database npm (severitate HIGH+)         | La fiecare push/PR |
-| **Gitleaks**      | Secrete     | API keys, PAT-uri, private keys in istoricul Git | La fiecare push/PR |
-| **Trivy config**  | IaC         | Misconfigurari Dockerfile, nginx, YAML           | La fiecare push/PR |
-| **Trivy image**   | Container   | CVE-uri in imaginea Docker (nginx:1.27-alpine)   | La fiecare push/PR |
+| **ESLint**        | Linting     | `eval()`, `new Function()`, `no-script-url`      | On every push/PR   |
+| **Karma/Jasmine** | Tests       | Functional regressions (29 unit tests, Chrome)   | On every push/PR   |
+| **Semgrep**       | SAST        | Hardcoded secrets, XSS, injection in TS code     | On every push/PR   |
+| **Trivy fs**      | SCA         | CVEs in npm dependencies (package-lock.json)     | On every push/PR   |
+| **npm audit**     | SCA         | npm advisory database (HIGH+ severity)           | On every push/PR   |
+| **Gitleaks**      | Secrets     | API keys, PATs, private keys in the Git history  | On every push/PR   |
+| **Trivy config**  | IaC         | Dockerfile, nginx, YAML misconfigurations        | On every push/PR   |
+| **Trivy image**   | Container   | CVEs in the Docker image (nginx:1.27-alpine)     | On every push/PR   |
 
 ### Shift-Right
 
-| Instrument    | Tip scanare | Ce detecteaza                              | Frecventa             |
-| ------------- | ----------- | ------------------------------------------ | --------------------- |
-| **OWASP ZAP** | DAST        | XSS reflectat, headers lipsa, clickjacking | Dupa deploy pe Render |
+| Tool          | Scan type   | What it detects                              | Frequency               |
+| ------------- | ----------- | -------------------------------------------- | ----------------------- |
+| **OWASP ZAP** | DAST        | Reflected XSS, missing headers, clickjacking | After deploy to Render  |
 
-### Vulnerabilitati intentionate
+### Intentional vulnerabilities
 
-Proiectul contine 7 vulnerabilitati plantate pentru a demonstra detectia scannerelor:
+The project contains 7 planted vulnerabilities to demonstrate scanner detection:
 
-| ID     | Tip                        | Fisier               | CWE     | Detectat de       |
-| ------ | -------------------------- | -------------------- | ------- | ----------------- |
-| VULN-1 | Hardcoded API Key          | `student.service.ts` | CWE-798 | Gitleaks, Semgrep |
-| VULN-2 | `new Function()` pe input  | `student.service.ts` | CWE-94  | ESLint            |
-| VULN-3 | `eval()` pe date externe   | `student.service.ts` | CWE-94  | ESLint            |
-| VULN-4 | GitHub PAT hardcodat       | `student.service.ts` | CWE-798 | Gitleaks          |
-| VULN-5 | JWT token hardcodat        | `auth.service.ts`    | CWE-798 | Semgrep           |
-| VULN-6 | RSA private key hardcodata | `environment.dev.ts` | CWE-321 | Gitleaks          |
-| VULN-7 | Parola admin hardcodata    | `auth.service.ts`    | CWE-798 | Semgrep           |
+| ID     | Type                        | File                 | CWE     | Detected by       |
+| ------ | --------------------------- | -------------------- | ------- | ----------------- |
+| VULN-1 | Hardcoded API Key           | `student.service.ts` | CWE-798 | Gitleaks, Semgrep |
+| VULN-2 | `new Function()` on input   | `student.service.ts` | CWE-94  | ESLint            |
+| VULN-3 | `eval()` on external data   | `student.service.ts` | CWE-94  | ESLint            |
+| VULN-4 | Hardcoded GitHub PAT        | `student.service.ts` | CWE-798 | Gitleaks          |
+| VULN-5 | Hardcoded JWT token         | `auth.service.ts`    | CWE-798 | Semgrep           |
+| VULN-6 | Hardcoded RSA private key   | `environment.dev.ts` | CWE-321 | Gitleaks          |
+| VULN-7 | Hardcoded admin password    | `auth.service.ts`    | CWE-798 | Semgrep           |

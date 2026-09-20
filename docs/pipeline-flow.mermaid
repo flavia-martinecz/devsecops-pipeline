@@ -1,22 +1,22 @@
 flowchart TD
-    Start(["👨‍💻 Dezvoltatorul face push pe GitHub"])
+    Start(["👨‍💻 Developer pushes to GitHub"])
 
-    Install["📦 1. Instalare<br/>Pregateste proiectul"]
+    Install["📦 1. Install<br/>Prepares the project"]
 
-    Quality["🧪 2. Calitate cod<br/>Verifica daca aplicatia<br/>se construieste si trece testele"]
-    SAST["🛡️ 3. SAST<br/>Cauta probleme<br/>in codul sursa"]
-    SCA["📚 4. Dependente<br/>Verifica librariile<br/>folosite (npm)"]
-    Secrets["🔑 5. Secrete<br/>Cauta parole sau chei<br/>uitate in cod"]
-    IaC["🏗️ 6. Configurari<br/>Verifica Dockerfile<br/>si fisiere de config"]
+    Quality["🧪 2. Code quality<br/>Checks that the app<br/>builds and passes the tests"]
+    SAST["🛡️ 3. SAST<br/>Looks for issues<br/>in the source code"]
+    SCA["📚 4. Dependencies<br/>Checks the libraries<br/>in use (npm)"]
+    Secrets["🔑 5. Secrets<br/>Looks for passwords or keys<br/>left in the code"]
+    IaC["🏗️ 6. Configurations<br/>Checks the Dockerfile<br/>and config files"]
 
-    Docker["🐳 7. Docker<br/>Construieste imaginea<br/>si o scaneaza"]
+    Docker["🐳 7. Docker<br/>Builds the image<br/>and scans it"]
 
-    Publish["🚀 8. Publicare<br/>Salveaza imaginea<br/>in GitHub Registry"]
-    Deploy["☁️ 9. Deploy<br/>Lanseaza aplicatia<br/>pe Render.com"]
+    Publish["🚀 8. Publish<br/>Saves the image<br/>to GitHub Registry"]
+    Deploy["☁️ 9. Deploy<br/>Launches the app<br/>on Render.com"]
 
-    DAST["🌐 10. DAST<br/>Testeaza aplicatia live<br/>ca un atacator real"]
+    DAST["🌐 10. DAST<br/>Tests the live app<br/>like a real attacker"]
 
-    Live(["✅ Aplicatia este online<br/>si verificata"])
+    Live(["✅ The app is online<br/>and verified"])
 
     Start --> Install
     Install --> Quality

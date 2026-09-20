@@ -19,7 +19,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.studentService.getStats().subscribe({
       next: (data) => (this.stats = data),
-      error: (err) => (this.error = 'Eroare la incarcarea statisticilor: ' + err.message),
+      error: (err) => (this.error = 'Error loading statistics: ' + err.message),
     });
   }
 }

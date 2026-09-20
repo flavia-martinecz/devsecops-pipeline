@@ -54,7 +54,7 @@ export class GradesReportComponent implements OnInit {
       const map = new Map<number, Student>(students.map((s) => [s.id, s]));
       this.allGrades = grades.map((g) => ({
         ...g,
-        studentName: map.get(g.studentId)?.name ?? "Necunoscut",
+        studentName: map.get(g.studentId)?.name ?? "Unknown",
         faculty: map.get(g.studentId)?.faculty ?? "-",
       }));
 
@@ -107,7 +107,7 @@ export class GradesReportComponent implements OnInit {
     this.gradeSuccess = false;
 
     if (!this.newStudentId || !this.newSubject.trim() || !this.newSemester) {
-      this.gradeError = "Toate campurile sunt obligatorii.";
+      this.gradeError = "All fields are required.";
       return;
     }
 

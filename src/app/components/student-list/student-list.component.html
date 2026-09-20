@@ -1,18 +1,18 @@
 <div class="student-list">
-  <h2>Lista Studentilor</h2>
+  <h2>Student List</h2>
 
   <div class="table-container" *ngIf="students.length > 0">
     <table>
       <thead>
         <tr>
           <th>ID</th>
-          <th>Nume</th>
+          <th>Name</th>
           <th>Email</th>
-          <th>Facultate</th>
-          <th>An</th>
-          <th>Ciclu</th>
-          <th>Note</th>
-          <th>Media</th>
+          <th>Faculty</th>
+          <th>Year</th>
+          <th>Cycle</th>
+          <th>Grades</th>
+          <th>Average</th>
         </tr>
       </thead>
       <tbody>
@@ -26,7 +26,7 @@
           <td>{{ s.email }}</td>
           <td>{{ s.faculty }}</td>
           <td>{{ s.year }}</td>
-          <td>{{ s.ciclu }}</td>
+          <td>{{ s.cycle }}</td>
           <td>{{ getGradeCount(s.id) }}</td>
           <td>
             <span
@@ -47,7 +47,7 @@
   </div>
 
   <div class="detail-card" *ngIf="selectedStudent">
-    <h3>Note pentru {{ selectedStudent.name }}</h3>
+    <h3>Grades for {{ selectedStudent.name }}</h3>
     <div class="grades-list" *ngIf="selectedGrades.length > 0">
       <div class="grade-item" *ngFor="let g of selectedGrades">
         <span class="subject">{{ g.subject }}</span>
@@ -62,12 +62,12 @@
       </div>
     </div>
     <p *ngIf="selectedGrades.length === 0" class="empty">
-      Nicio nota inregistrata.
+      No grades recorded.
     </p>
   </div>
 
   <p *ngIf="students.length === 0 && !loading" class="empty">
-    Niciun student inregistrat.
+    No students registered.
   </p>
-  <p *ngIf="loading" class="loading">Se incarca...</p>
+  <p *ngIf="loading" class="loading">Loading...</p>
 </div>

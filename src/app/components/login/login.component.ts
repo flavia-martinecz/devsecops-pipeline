@@ -24,14 +24,14 @@ export class LoginComponent {
   onLogin(): void {
     this.errorMsg = "";
     if (!this.email.trim() || !this.password.trim()) {
-      this.errorMsg = "Email si parola sunt obligatorii.";
+      this.errorMsg = "Email and password are required.";
       return;
     }
 
     if (this.authService.login(this.email, this.password)) {
       this.router.navigate(["/dashboard"]);
     } else {
-      this.errorMsg = "Email sau parola incorecte.";
+      this.errorMsg = "Incorrect email or password.";
     }
   }
 }

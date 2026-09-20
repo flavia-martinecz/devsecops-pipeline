@@ -14,81 +14,81 @@ export class StudentService {
       id: 1,
       name: "Maria Ionescu",
       email: "maria.ionescu@student.upt.ro",
-      faculty: "Automatica si Calculatoare",
+      faculty: "Automation and Computers",
       year: 3,
-      ciclu: "Licenta",
+      cycle: "Bachelor",
     },
     {
       id: 2,
       name: "Andrei Popescu",
       email: "andrei.popescu@student.upt.ro",
-      faculty: "Automatica si Calculatoare",
+      faculty: "Automation and Computers",
       year: 2,
-      ciclu: "Licenta",
+      cycle: "Bachelor",
     },
     {
       id: 3,
       name: "Elena Dumitrescu",
       email: "elena.dumitrescu@student.upt.ro",
-      faculty: "Electronica si Telecomunicatii",
+      faculty: "Electronics and Telecommunications",
       year: 4,
-      ciclu: "Licenta",
+      cycle: "Bachelor",
     },
     {
       id: 4,
       name: "Alexandru Marin",
       email: "alex.marin@student.upt.ro",
-      faculty: "Mecanica",
+      faculty: "Mechanical Engineering",
       year: 1,
-      ciclu: "Masterat",
+      cycle: "Master",
     },
     {
       id: 5,
       name: "Ioana Stanescu",
       email: "ioana.stanescu@student.upt.ro",
-      faculty: "Automatica si Calculatoare",
+      faculty: "Automation and Computers",
       year: 3,
-      ciclu: "Masterat",
+      cycle: "Master",
     },
     {
       id: 6,
       name: "Cristian Radu",
       email: "cristian.radu@student.upt.ro",
-      faculty: "Electronica si Telecomunicatii",
+      faculty: "Electronics and Telecommunications",
       year: 2,
-      ciclu: "Licenta",
+      cycle: "Bachelor",
     },
     {
       id: 7,
       name: "Ana Georgescu",
       email: "ana.georgescu@student.upt.ro",
-      faculty: "Constructii",
+      faculty: "Civil Engineering",
       year: 1,
-      ciclu: "Licenta",
+      cycle: "Bachelor",
     },
     {
       id: 8,
       name: "Mihai Popa",
       email: "mihai.popa@student.upt.ro",
-      faculty: "Automatica si Calculatoare",
+      faculty: "Automation and Computers",
       year: 4,
-      ciclu: "Masterat",
+      cycle: "Master",
     },
     {
       id: 9,
       name: "Diana Florea",
       email: "diana.florea@student.upt.ro",
-      faculty: "Chimie",
+      faculty: "Chemistry",
       year: 2,
-      ciclu: "Licenta",
+      cycle: "Bachelor",
     },
     {
       id: 10,
       name: "Stefan Moldovan",
       email: "stefan.moldovan@student.upt.ro",
-      faculty: "Automatica si Calculatoare",
+      faculty: "Automation and Computers",
       year: 1,
-      ciclu: "Masterat",
+      cycle: "Master",
     },
   ];
 
@@ -96,49 +96,49 @@ export class StudentService {
     {
       id: 1,
       studentId: 1,
-      subject: "Securitatea Aplicatiilor Cloud",
+      subject: "Cloud Application Security",
       grade: 10,
       semester: "2026-2",
     },
     {
       id: 2,
       studentId: 1,
-      subject: "Retele de Calculatoare",
+      subject: "Computer Networks",
       grade: 9,
       semester: "2026-1",
     },
     {
       id: 3,
       studentId: 2,
-      subject: "Algoritmi si Structuri de Date",
+      subject: "Algorithms and Data Structures",
       grade: 8,
       semester: "2025-1",
     },
     {
       id: 4,
       studentId: 2,
-      subject: "Baze de Date",
+      subject: "Databases",
       grade: 7,
       semester: "2025-1",
     },
     {
       id: 5,
       studentId: 3,
-      subject: "Sisteme de Operare",
+      subject: "Operating Systems",
       grade: 9,
       semester: "2025-2",
     },
     {
       id: 6,
       studentId: 4,
-      subject: "Matematica 1",
+      subject: "Mathematics 1",
       grade: 6,
       semester: "2025-1",
     },
     {
       id: 7,
       studentId: 5,
-      subject: "Inginerie Software",
+      subject: "Software Engineering",
       grade: 10,
       semester: "2025-2",
     },
@@ -146,21 +146,21 @@ export class StudentService {
     {
       id: 9,
       studentId: 6,
-      subject: "Electronica Digitala",
+      subject: "Digital Electronics",
       grade: 8,
       semester: "2026-1",
     },
     {
       id: 10,
       studentId: 7,
-      subject: "Rezistenta Materialelor",
+      subject: "Strength of Materials",
       grade: 7,
       semester: "2025-1",
     },
     {
       id: 11,
       studentId: 8,
-      subject: "Inteligenta Artificiala",
+      subject: "Artificial Intelligence",
       grade: 10,
       semester: "2025-2",
     },
@@ -174,14 +174,14 @@ export class StudentService {
     {
       id: 13,
       studentId: 9,
-      subject: "Chimie Organica",
+      subject: "Organic Chemistry",
       grade: 8,
       semester: "2025-1",
     },
     {
       id: 14,
       studentId: 10,
-      subject: "Programare C",
+      subject: "C Programming",
       grade: 7,
       semester: "2026-1",
     },
@@ -194,18 +194,65 @@ export class StudentService {
     this.loadFromStorage();
   }
 
+  // Data saved in localStorage before the app was translated to English
+  private readonly LEGACY_FACULTIES: Record<string, string> = {
+    "Automatica si Calculatoare": "Automation and Computers",
+    "Electronica si Telecomunicatii": "Electronics and Telecommunications",
+    Mecanica: "Mechanical Engineering",
+    Constructii: "Civil Engineering",
+    Chimie: "Chemistry",
+  };
+  private readonly LEGACY_CYCLES: Record<string, Student["cycle"]> = {
+    Licenta: "Bachelor",
+    Masterat: "Master",
+  };
+  private readonly LEGACY_SUBJECTS: Record<string, string> = {
+    "Securitatea Aplicatiilor Cloud": "Cloud Application Security",
+    "Retele de Calculatoare": "Computer Networks",
+    "Algoritmi si Structuri de Date": "Algorithms and Data Structures",
+    "Baze de Date": "Databases",
+    "Sisteme de Operare": "Operating Systems",
+    "Matematica 1": "Mathematics 1",
+    "Inginerie Software": "Software Engineering",
+    "Electronica Digitala": "Digital Electronics",
+    "Rezistenta Materialelor": "Strength of Materials",
+    "Inteligenta Artificiala": "Artificial Intelligence",
+    "Chimie Organica": "Organic Chemistry",
+    "Programare C": "C Programming",
+  };
+
   private loadFromStorage(): void {
     const savedStudents = localStorage.getItem(this.LS_STUDENTS);
     if (savedStudents) {
       const parsed = JSON.parse(savedStudents);
-      this.mockStudents = parsed.map((s: Student, i: number) =>
-        s.ciclu ? s : { ...s, ciclu: this.mockStudents[i]?.ciclu ?? "Licenta" },
+      this.mockStudents = parsed.map(
+        (s: Student & { ciclu?: string }, i: number): Student => {
+          const rawCycle = s.cycle ?? s.ciclu;
+          const cycle =
+            (rawCycle && (this.LEGACY_CYCLES[rawCycle] ?? rawCycle)) ||
+            this.mockStudents[i]?.cycle ||
+            "Bachelor";
+          return {
+            id: s.id,
+            name: s.name,
+            email: s.email,
+            faculty: this.LEGACY_FACULTIES[s.faculty] ?? s.faculty,
+            year: s.year,
+            cycle: cycle as Student["cycle"],
+            ...(s.enrolledAt ? { enrolledAt: s.enrolledAt } : {}),
+          };
+        },
       );
       this.saveStudents();
     }
     const savedGrades = localStorage.getItem(this.LS_GRADES);
     if (savedGrades) {
-      this.mockGrades = JSON.parse(savedGrades);
+      const parsed: Grade[] = JSON.parse(savedGrades);
+      this.mockGrades = parsed.map((g) => ({
+        ...g,
+        subject: this.LEGACY_SUBJECTS[g.subject] ?? g.subject,
+      }));
+      this.saveGrades();
     }
   }
 
@@ -293,7 +340,7 @@ export class StudentService {
       email: student.email!,
       faculty: student.faculty!,
       year: student.year!,
-      ciclu: student.ciclu!,
+      cycle: student.cycle!,
       enrolledAt: new Date().toISOString().split("T")[0],
     };
     this.mockStudents.push(newStudent);

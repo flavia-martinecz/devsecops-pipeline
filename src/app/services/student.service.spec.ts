@@ -43,7 +43,7 @@ describe("StudentService", () => {
   });
 
   it("should search students by faculty", (done) => {
-    service.searchStudents("Automatica").subscribe((results) => {
+    service.searchStudents("Automation").subscribe((results) => {
       expect(results.length).toBe(5);
       done();
     });
@@ -68,7 +68,7 @@ describe("StudentService", () => {
   it("should get grades for student", () => {
     const grades = service.getGradesForStudent(1);
     expect(grades.length).toBe(2);
-    expect(grades[0].subject).toBe("Securitatea Aplicatiilor Cloud");
+    expect(grades[0].subject).toBe("Cloud Application Security");
   });
 
   it("should return empty grades for unknown student", () => {
@@ -77,5 +77,51 @@ describe("StudentService", () => {
 
   it("processFormulaSafe should calculate average", () => {
     expect(service.processFormulaSafe(8, 10)).toBe(9);
+  });
+
+  it("should migrate legacy Romanian data from localStorage", (done) => {
+    localStorage.setItem(
+      "portal_students",
+      JSON.stringify([
+        {
+          id: 1,
+          name: "Maria Ionescu",
+          email: "maria.ionescu@student.upt.ro",
+          faculty: "Automatica si Calculatoare",
+          year: 3,
+          ciclu: "Masterat",
+        },
+      ]),
+    );
+    localStorage.setItem(
+      "portal_grades",
+      JSON.stringify([
+        {
+          id: 1,
+          studentId: 1,
+          subject: "Retele de Calculatoare",
+          grade: 9,
+          semester: "2026-1",
+        },
+      ]),
+    );
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const migrated = TestBed.inject(StudentService);
+
+    migrated.getStudents().subscribe((students) => {
+      expect(students.length).toBe(1);
+      expect(students[0].faculty).toBe("Automation and Computers");
+      expect(students[0].cycle).toBe("Master");
+      expect((students[0] as unknown as { ciclu?: string }).ciclu).toBeUndefined();
+      expect(migrated.getGradesForStudent(1)[0].subject).toBe("Computer Networks");
+
+      const saved = JSON.parse(localStorage.getItem("portal_students")!);
+      expect(saved[0].faculty).toBe("Automation and Computers");
+      done();
+    });
   });
 });

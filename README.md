@@ -1,33 +1,33 @@
-# Pipeline DevSecOps
+# DevSecOps Pipeline
 
 **Flavia Martinecz**<br>
-**UPT - Master SISC - Securitatea Aplicatiilor Cloud**
+**UPT - SISC Master's - Cloud Application Security**
 
-## Tema practica
+## Practical assignment
 
-**6. Pipeline DevSecOps de Baza**
+**6. Basic DevSecOps Pipeline**
 
-Configureaza un pipeline CI/CD (GitHub Actions) care include SAST, scanare dependente si scanare imagini Docker.<br>
-Tenta personala: Studentul integreaza pipeline-ul pe un proiect personal sau de la facultate.
+Configure a CI/CD pipeline (GitHub Actions) that includes SAST, dependency scanning and Docker image scanning.<br>
+Personal touch: The student integrates the pipeline into a personal or university project.
 
 ---
 
-## Despre proiect
+## About the project
 
-Am configurat un pipeline CI/CD cu GitHub Actions care integreaza verificari de securitate automate pe o aplicatie front-end, un Portal Studenti - UPT, dezvoltata cu framework-ul Angular v.18, cu deploy automat pe Render.com dupa ce toate scanarile de securitate trec cu succes.
+I configured a CI/CD pipeline with GitHub Actions that integrates automated security checks on a front-end application, a Student Portal - UPT, built with the Angular v.18 framework, with automatic deployment to Render.com after all security scans pass successfully.
 
 ```
 
-PIPELINE DevSecOps — GitHub Actions (10 etape)
+DevSecOps PIPELINE — GitHub Actions (10 stages)
 
   push → install ──┬── quality-gate    (ESLint + Karma + ng build)
                    ├── SAST            (Semgrep)
                    ├── SCA             (Trivy + npm)
                    └── IaC             (Trivy config)
 
-         secrets-scan (Gitleaks) ── ruleaza independent ──┐
+         secrets-scan (Gitleaks) ── runs independently ────┐
                                                           │
-         Docker-build-scan ◄── asteapta TOATE 5 ──────────┘
+         Docker-build-scan ◄── waits for ALL 5 ───────────┘
             │         │
          Publish   Deploy - Render
                       │
@@ -35,106 +35,106 @@ PIPELINE DevSecOps — GitHub Actions (10 etape)
 
 ```
 
-**Secret scanning** - Gitleaks scaneaza tot istoricul Git ca sa prinda parole sau chei API comise accidental. 
+**Secret scanning** - Gitleaks scans the entire Git history to catch passwords or API keys committed by accident. 
 
-**Quality Gate** - ESLint, Karma si ng build verifica daca codul respecta standardele de calitate, testele trec si aplicatia compileaza corect inainte de orice alta etapa.
+**Quality Gate** - ESLint, Karma and ng build check that the code meets quality standards, the tests pass and the application compiles correctly before any other stage.
 
-**SAST - Static Application Security Testing** - Semgrep, care analizeaza codul sursa fara sa-l ruleze si cauta pattern-uri de vulnerabilitati cunoscute, cum ar fi eval, XSS sau injection.
+**SAST - Static Application Security Testing** - Semgrep, which analyzes the source code without running it and looks for known vulnerability patterns, such as eval, XSS or injection.
 
-**SCA - Software Composition Analysis sau scanarea dependentelor** am folosit doua instrumente: Trivy si npm audit, care verifica daca bibliotecile pe care le folosesc au vulnerabilitati cunoscute, adica CVE-uri.
+**SCA - Software Composition Analysis or dependency scanning** I used two tools: Trivy and npm audit, which check whether the libraries I use have known vulnerabilities, i.e. CVEs.
 
-**IaC** - Infrastructure as Code - Trivy scaneaza fisierele de configurare ale infrastructurii pentru a detecta setari gresite care ar putea expune sistemul la atacuri.
+**IaC** - Infrastructure as Code - Trivy scans the infrastructure configuration files to detect misconfigurations that could expose the system to attacks.
 
-**Docker** este tehnologia care impacheteaza aplicatia intr-o singura imagine portabila. Dupa ce construiesc imaginea, o scanez cu Trivy. Trivy verifica toate pachetele din sistemul de operare al imaginii si imi spune daca vreunul are vulnerabilitati cunoscute. 
+**Docker** is the technology that packages the application into a single portable image. After building the image, I scan it with Trivy. Trivy checks all the packages in the image's operating system and tells me whether any of them has known vulnerabilities. 
 
-**DAST - Dynamic Application Security Testing** - Testeaza aplicatia in timp ce ruleaza, atacand-o din exterior ca un hacker real, fara sa se uite la codul sursa.
+**DAST - Dynamic Application Security Testing** - Tests the application while it is running, attacking it from the outside like a real hacker, without looking at the source code.
 
 ---
 
-## Proiect cloud
+## Cloud project
 
-Acest proiect demonstreaza securitatea aplicatiilor cloud pe mai multe niveluri:
+This project demonstrates cloud application security on multiple levels:
 
-1. **Pipeline-ul ruleaza in cloud** — GitHub Actions porneste containere pe servere Microsoft Azure la fiecare push
-2. **Imaginea Docker** este construita si scanata in cloud, apoi deployata pe Render
-3. **Supply Chain Security** — verific fiecare dependenta npm si fiecare pachet din imaginea Docker inainte sa ajunga in productie
-4. **Secretele in cloud** — Gitleaks previne expunerea accidentala de credentiale in cod care e hostat public pe GitHub
+1. **The pipeline runs in the cloud** — GitHub Actions spins up containers on Microsoft Azure servers on every push
+2. **The Docker image** is built and scanned in the cloud, then deployed to Render
+3. **Supply Chain Security** — I check every npm dependency and every package in the Docker image before it reaches production
+4. **Secrets in the cloud** — Gitleaks prevents accidental exposure of credentials in code that is publicly hosted on GitHub
 
 ---
 
 ## Shift-Left vs Shift-Right
 
-In securitatea software traditionala, testarea se facea dupa deploy. **DevSecOps** muta verificarile **cat mai devreme** in pipeline, aceasta abordare se numeste **Shift-Left**.
+In traditional software security, testing was done after deployment. **DevSecOps** moves the checks **as early as possible** in the pipeline; this approach is called **Shift-Left**.
 
-Cele doua concepte importante sunt:<br>
-**Shift-Left** = gaseste vulnerabilitati **inainte** sa ajunga in productie (in cod, dependente, configurari).<br>
-**Shift-Right** = testeaza aplicatia **dupa deploy**, pe mediul live, asa cum o vede un atacator real.
+The two important concepts are:<br>
+**Shift-Left** = find vulnerabilities **before** they reach production (in code, dependencies, configurations).<br>
+**Shift-Right** = test the application **after deployment**, on the live environment, the way a real attacker sees it.
 
 ```
-                    COD SURSA                              PRODUCTIE
+                    SOURCE CODE                            PRODUCTION
                         │                                      │
     ◄───── SHIFT-LEFT ──┼──────────── DEPLOY ──────────────────┼── SHIFT-RIGHT ────►
                         │                                      │
-    Gitleaks (secrete)  │                                      │  OWASP ZAP (DAST)
-    ESLint (lint+sec)   │                                      │  Monitorizare live
-    Semgrep (SAST)      │     Vulnerabilitatile gasite         │
-    Trivy SCA (deps)    │     aici NU ajung in productie       │  Vulnerabilitatile
-    Trivy IaC (config)  │                                      │  gasite aici sunt
-    Trivy Docker (img)  │                                      │  deja in productie
+    Gitleaks (secrets)  │                                      │  OWASP ZAP (DAST)
+    ESLint (lint+sec)   │                                      │  Live monitoring
+    Semgrep (SAST)      │     Vulnerabilities found            │
+    Trivy SCA (deps)    │     here do NOT reach production     │  Vulnerabilities
+    Trivy IaC (config)  │                                      │  found here are
+    Trivy Docker (img)  │                                      │  already in production
                         │                                      │
 ```
 
-**De ce conteaza:** O vulnerabilitate gasita in cod (shift-left) costa 10x mai putin
-de remediat decat una descoperita in productie (shift-right). Pipeline-ul meu
-combina ambele abordari pentru acoperire completa.
+**Why it matters:** A vulnerability found in code (shift-left) costs 10x less
+to fix than one discovered in production (shift-right). My pipeline
+combines both approaches for complete coverage.
 
-## Componente de securitate
+## Security components
 
 ### Shift-Left
 
-Aceste scanari ruleaza la fiecare push/PR, pe codul sursa, dependente si configurari.
+These scans run on every push/PR, on the source code, dependencies and configurations.
 
-|     | Componenta | Instrument        | Ce Scaneaza                                  | Ce Gaseste                                |
-| --- | ---------- | ----------------- | -------------------------------------------- | ----------------------------------------- |
-| 1   | Secrete    | Gitleaks          | Tot istoricul Git + codul curent             | API keys, PAT-uri, private keys expuse    |
-| 2   | SAST       | Semgrep           | Codul sursa TypeScript/Angular               | Secrets hardcodate (JWT, parole, chei)    |
-| 3   | Quality    | ESLint + Karma    | Codul sursa + teste unitare                  | `eval()`, `new Function()`, bug-uri       |
-| 4   | SCA        | Trivy + npm audit | `package-lock.json` + `node_modules/`        | CVE-uri in librarii npm (Angular, rxjs)   |
-| 5   | IaC        | Trivy config      | `Dockerfile`, `nginx.conf`, fisiere YAML     | Misconfigurari (root user, headers lipsa) |
-| 6   | Container  | Trivy image       | Imaginea Docker finala (`nginx:1.27-alpine`) | CVE-uri in pachetele OS din container     |
+|     | Component  | Tool              | What it scans                                | What it finds                                |
+| --- | ---------- | ----------------- | -------------------------------------------- | -------------------------------------------- |
+| 1   | Secrets    | Gitleaks          | Entire Git history + current code            | Exposed API keys, PATs, private keys         |
+| 2   | SAST       | Semgrep           | TypeScript/Angular source code               | Hardcoded secrets (JWT, passwords, keys)     |
+| 3   | Quality    | ESLint + Karma    | Source code + unit tests                     | `eval()`, `new Function()`, bugs             |
+| 4   | SCA        | Trivy + npm audit | `package-lock.json` + `node_modules/`        | CVEs in npm libraries (Angular, rxjs)        |
+| 5   | IaC        | Trivy config      | `Dockerfile`, `nginx.conf`, YAML files       | Misconfigurations (root user, missing headers) |
+| 6   | Container  | Trivy image       | Final Docker image (`nginx:1.27-alpine`)     | CVEs in the container's OS packages          |
 
 ### Shift-Right
 
-Aceasta scanare ruleaza pe aplicatia live deployata pe Render, simuland un atacator extern.
+This scan runs against the live application deployed on Render, simulating an external attacker.
 
-|     | Componenta | Instrument | Ce Scaneaza                       | Ce Gaseste                               |
+|     | Component  | Tool       | What it scans                     | What it finds                            |
 | --- | ---------- | ---------- | --------------------------------- | ---------------------------------------- |
-| 7   | DAST       | OWASP ZAP  | Aplicatia live pe Render (HTTP/S) | XSS - Cross-Site Scripting, clickjacking |
+| 7   | DAST       | OWASP ZAP  | Live application on Render (HTTP/S) | XSS - Cross-Site Scripting, clickjacking |
 
-### Vulnerabilitati plantate
+### Planted vulnerabilities
 
-Proiectul contine 7 vulnerabilitati intentionate distribuite in mai multe fisiere,
-fiecare detectata de un scanner din pipeline:
+The project contains 7 intentional vulnerabilities spread across several files,
+each detected by a scanner in the pipeline:
 
-| ID     | Tip                        | Fisier               | CWE     | Detectat de       |
-| ------ | -------------------------- | -------------------- | ------- | ----------------- |
-| VULN-1 | Hardcoded API Key          | `student.service.ts` | CWE-798 | Gitleaks, Semgrep |
-| VULN-2 | `new Function()` pe input  | `student.service.ts` | CWE-94  | ESLint            |
-| VULN-3 | `eval()` pe date externe   | `student.service.ts` | CWE-94  | ESLint            |
-| VULN-4 | GitHub PA Token hardcodat  | `student.service.ts` | CWE-798 | Gitleaks          |
-| VULN-5 | JWT token hardcodat        | `auth.service.ts`    | CWE-798 | Semgrep           |
-| VULN-6 | RSA private key hardcodata | `environment.dev.ts` | CWE-321 | Gitleaks          |
-| VULN-7 | Parola admin hardcodata    | `auth.service.ts`    | CWE-798 | Semgrep           |
+| ID     | Type                        | File                 | CWE     | Detected by       |
+| ------ | --------------------------- | -------------------- | ------- | ----------------- |
+| VULN-1 | Hardcoded API Key           | `student.service.ts` | CWE-798 | Gitleaks, Semgrep |
+| VULN-2 | `new Function()` on input   | `student.service.ts` | CWE-94  | ESLint            |
+| VULN-3 | `eval()` on external data   | `student.service.ts` | CWE-94  | ESLint            |
+| VULN-4 | Hardcoded GitHub PA Token   | `student.service.ts` | CWE-798 | Gitleaks          |
+| VULN-5 | Hardcoded JWT token         | `auth.service.ts`    | CWE-798 | Semgrep           |
+| VULN-6 | Hardcoded RSA private key   | `environment.dev.ts` | CWE-321 | Gitleaks          |
+| VULN-7 | Hardcoded admin password    | `auth.service.ts`    | CWE-798 | Semgrep           |
 
 ---
 
-## Structura proiectului
+## Project structure
 
 ```
 devsecops-pipeline/
 ├── .github/workflows/
-│   └── devsecops-pipeline.yml      ← Pipeline complet (10 etape)
-├── .gitleaks.toml                  ← Configuratie secret scanning
+│   └── devsecops-pipeline.yml      ← Full pipeline (10 stages)
+├── .gitleaks.toml                  ← Secret scanning configuration
 ├── nginx/
 │   ├── nginx.conf
 │   ├── default.conf
@@ -142,22 +142,22 @@ devsecops-pipeline/
 ├── src/
 │   ├── app/
 │   │   ├── components/
-│   │   │   ├── dashboard/          ← Statistici generale
-│   │   │   ├── student-list/       ← Tabel studenti si note
-│   │   │   ├── student-search/     ← Cautare studenti
-│   │   │   ├── add-student/        ← Formular adaugare student
-│   │   │   ├── login/              ← Autentificare mock (consuma VULN-5, VULN-7)
-│   │   │   └── grades-report/      ← Raport note cu filtrare
+│   │   │   ├── dashboard/          ← General statistics
+│   │   │   ├── student-list/       ← Students and grades table
+│   │   │   ├── student-search/     ← Student search
+│   │   │   ├── add-student/        ← Add student form
+│   │   │   ├── login/              ← Mock authentication (uses VULN-5, VULN-7)
+│   │   │   └── grades-report/      ← Grades report with filtering
 │   │   ├── models/
-│   │   │   └── student.model.ts    ← Interfete Student, Grade, DashboardStats
+│   │   │   └── student.model.ts    ← Student, Grade, DashboardStats interfaces
 │   │   ├── services/
 │   │   │   ├── student.service.ts  ← HTTP service + VULN-1, 2, 3, 4
-│   │   │   └── auth.service.ts     ← Auth mock + VULN-5, VULN-7
+│   │   │   └── auth.service.ts     ← Mock auth + VULN-5, VULN-7
 │   │   ├── app.component.ts
 │   │   └── app.routes.ts
 │   ├── environments/
 │   │   ├── environment.ts
-│   │   ├── environment.dev.ts      ← VULN-6 (RSA private key hardcodata)
+│   │   ├── environment.dev.ts      ← VULN-6 (hardcoded RSA private key)
 │   │   └── environment.prod.ts
 │   ├── assets/
 │   ├── index.html
@@ -166,11 +166,11 @@ devsecops-pipeline/
 ├── Dockerfile                      ← Multi-stage build: node:20-alpine → nginx:1.27-alpine
 ├── render.yaml                     ← Render
 ├── angular.json                    ← Angular CLI config
-├── eslint.config.js                ← ESLint + reguli securitate (no-eval, no-new-func)
-├── karma.conf.js                   ← Karma (teste unitare)
+├── eslint.config.js                ← ESLint + security rules (no-eval, no-new-func)
+├── karma.conf.js                   ← Karma (unit tests)
 ├── tsconfig.json                   ← TypeScript strict mode
-├── SECURITY.md                     ← Politica de securitate + inventar instrumente
-└── package.json                    ← Angular 18.2, dependente npm
+├── SECURITY.md                     ← Security policy + tool inventory
+└── package.json                    ← Angular 18.2, npm dependencies
 ```
 
 ---
@@ -183,16 +183,16 @@ devsecops-pipeline/
 Repository → Security and quality
 ```
 
-Apar rezultatele SARIF incarcate de pipeline:
+The SARIF results uploaded by the pipeline appear here:
 
-- **Semgrep** (`sast-semgrep`) — secrets hardcodate in codul TypeScript (API key, JWT token, parola admin)
-- **Trivy filesystem scan** (`sca-trivy`) — CVE-uri din dependentele npm
-- **Trivy config** (`iac-trivy`) — misconfigurari in Dockerfile, nginx, YAML configs
-- **Trivy image** (`docker-trivy`) — CVE-uri din pachetele imaginii Docker nginx:1.27-alpine
-- **Gitleaks** (`secrets-gitleaks`) — secrete expuse (API key, GitHub PAT, RSA private key) in codul sursa si istoricul Git
+- **Semgrep** (`sast-semgrep`) — hardcoded secrets in the TypeScript code (API key, JWT token, admin password)
+- **Trivy filesystem scan** (`sca-trivy`) — CVEs in npm dependencies
+- **Trivy config** (`iac-trivy`) — misconfigurations in Dockerfile, nginx, YAML configs
+- **Trivy image** (`docker-trivy`) — CVEs in the packages of the nginx:1.27-alpine Docker image
+- **Gitleaks** (`secrets-gitleaks`) — exposed secrets (API key, GitHub PAT, RSA private key) in the source code and Git history
 
-Fiecare alerta arata fisierul, linia, severitatea (Critical/High/Medium/Low) si
-recomandarea de remediere.
+Each alert shows the file, the line, the severity (Critical/High/Medium/Low) and
+the remediation recommendation.
 
 ### Actions
 
@@ -200,9 +200,9 @@ recomandarea de remediere.
 Repository → Actions
 ```
 
-- Status fiecare job (verde = succes, rosu = esec)
-- Log-uri detaliate per step
-- Artefacte generate:<br>
+- Status of each job (green = success, red = failure)
+- Detailed logs per step
+- Generated artifacts:<br>
 `sast-report`, `dependency-reports`, `gitleaks-report`, `iac-report`, `dast-report`, `quality-reports`
 
 ### Issues
@@ -211,28 +211,28 @@ Repository → Actions
 Repository → Issues
 ```
 
-Pentru fiecare vulnerabilitate relevanta detectata de tool-urile (Semgrep, Gitleaks, Trivy, etc.) se creeaza manual un issue de remediere, conectat la finding-ul corespunzator din tab-ul Security.
+For each relevant vulnerability detected by the tools (Semgrep, Gitleaks, Trivy, etc.) a remediation issue is created manually, linked to the corresponding finding in the Security tab.
 
-Issue-ul contine descrierea problemei, severitatea, fisierul si linia afectata, plus pasii de remediere. Poate fi atribuit unui responsabil si urmarit pana la rezolvare.
+The issue contains the problem description, the severity, the affected file and line, plus the remediation steps. It can be assigned to an owner and tracked until it is resolved.
 
 ---
 
-## Instrumente folosite
+## Tools used
 
-| Instrument                                                     | Rol                                              | Cost                |
+| Tool                                                           | Role                                             | Cost                |
 | -------------------------------------------------------------- | ------------------------------------------------ | ------------------- |
-| [Semgrep CE](https://semgrep.dev)                              | SAST (p/security-audit, p/typescript, p/secrets) | Gratuit             |
-| [Trivy](https://trivy.dev)                                     | SCA filesystem + IaC config + Container scanning | Gratuit             |
-| [npm audit](https://docs.npmjs.com/cli/v10/commands/npm-audit) | SCA npm advisory database                        | Gratuit             |
-| [Gitleaks](https://gitleaks.io)                                | Secret detection (tot istoricul Git)             | Gratuit             |
-| [OWASP ZAP](https://www.zaproxy.org)                           | DAST (baseline scan aplicatie live)              | Gratuit             |
-| [ESLint](https://eslint.org)                                   | Linting + reguli securitate (no-eval etc.)       | Gratuit             |
-| [Karma](https://karma-runner.github.io)                        | Teste unitare                                    | Gratuit             |
-| [GitHub Actions](https://github.com/features/actions)          | CI/CD (10 etape automate)                        | Gratuit             |
-| [Render](https://render.com)                                   | Cloud Deploy PaaS                                | Gratuit             |
+| [Semgrep CE](https://semgrep.dev)                              | SAST (p/security-audit, p/typescript, p/secrets) | Free                |
+| [Trivy](https://trivy.dev)                                     | SCA filesystem + IaC config + Container scanning | Free                |
+| [npm audit](https://docs.npmjs.com/cli/v10/commands/npm-audit) | SCA npm advisory database                        | Free                |
+| [Gitleaks](https://gitleaks.io)                                | Secret detection (entire Git history)            | Free                |
+| [OWASP ZAP](https://www.zaproxy.org)                           | DAST (baseline scan of the live application)     | Free                |
+| [ESLint](https://eslint.org)                                   | Linting + security rules (no-eval etc.)          | Free                |
+| [Karma](https://karma-runner.github.io)                        | Unit tests                                       | Free                |
+| [GitHub Actions](https://github.com/features/actions)          | CI/CD (10 automated stages)                      | Free                |
+| [Render](https://render.com)                                   | Cloud Deploy PaaS                                | Free                |
 
 ---
 
-## Licenta
+## License
 
-UPT - Master SISC | Securitatea Aplicatiilor Cloud
+UPT - SISC Master's | Cloud Application Security

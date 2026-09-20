@@ -16,9 +16,9 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should have title Portal Studenti', () => {
+  it('should have title Student Portal', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('Portal Studenti');
+    expect(app.title).toEqual('Student Portal');
   });
 });
