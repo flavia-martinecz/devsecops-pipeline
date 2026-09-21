@@ -1,14 +1,14 @@
 # DevSecOps Pipeline
 
-**Flavia Martinecz**<br>
-**UPT - SISC Master's - Cloud Application Security**
+**Cloud Application Security**
+Student project developed for the Cloud Application Security course of the Master's programme.
 
 ## Practical assignment
 
-**6. Basic DevSecOps Pipeline**
+**Basic DevSecOps Pipeline**
 
 Configure a CI/CD pipeline (GitHub Actions) that includes SAST, dependency scanning and Docker image scanning.<br>
-Personal touch: The student integrates the pipeline into a personal or university project.
+Personal touch: The student integrates the pipeline into a personal project.
 
 ---
 
@@ -26,8 +26,8 @@ DevSecOps PIPELINE — GitHub Actions (10 stages)
                    └── IaC             (Trivy config)
 
          secrets-scan (Gitleaks) ── runs independently ────┐
-                                                          │
-         Docker-build-scan ◄── waits for ALL 5 ───────────┘
+                                                           │
+         Docker-build-scan ◄── waits for ALL 5 ────────────┘
             │         │
          Publish   Deploy - Render
                       │
@@ -35,7 +35,7 @@ DevSecOps PIPELINE — GitHub Actions (10 stages)
 
 ```
 
-**Secret scanning** - Gitleaks scans the entire Git history to catch passwords or API keys committed by accident. 
+**Secret scanning** - Gitleaks scans the entire Git history to catch passwords or API keys committed by accident.
 
 **Quality Gate** - ESLint, Karma and ng build check that the code meets quality standards, the tests pass and the application compiles correctly before any other stage.
 
@@ -45,7 +45,7 @@ DevSecOps PIPELINE — GitHub Actions (10 stages)
 
 **IaC** - Infrastructure as Code - Trivy scans the infrastructure configuration files to detect misconfigurations that could expose the system to attacks.
 
-**Docker** is the technology that packages the application into a single portable image. After building the image, I scan it with Trivy. Trivy checks all the packages in the image's operating system and tells me whether any of them has known vulnerabilities. 
+**Docker** is the technology that packages the application into a single portable image. After building the image, I scan it with Trivy. Trivy checks all the packages in the image's operating system and tells me whether any of them has known vulnerabilities.
 
 **DAST - Dynamic Application Security Testing** - Tests the application while it is running, attacking it from the outside like a real hacker, without looking at the source code.
 
@@ -94,37 +94,37 @@ combines both approaches for complete coverage.
 
 These scans run on every push/PR, on the source code, dependencies and configurations.
 
-|     | Component  | Tool              | What it scans                                | What it finds                                |
-| --- | ---------- | ----------------- | -------------------------------------------- | -------------------------------------------- |
-| 1   | Secrets    | Gitleaks          | Entire Git history + current code            | Exposed API keys, PATs, private keys         |
-| 2   | SAST       | Semgrep           | TypeScript/Angular source code               | Hardcoded secrets (JWT, passwords, keys)     |
-| 3   | Quality    | ESLint + Karma    | Source code + unit tests                     | `eval()`, `new Function()`, bugs             |
-| 4   | SCA        | Trivy + npm audit | `package-lock.json` + `node_modules/`        | CVEs in npm libraries (Angular, rxjs)        |
-| 5   | IaC        | Trivy config      | `Dockerfile`, `nginx.conf`, YAML files       | Misconfigurations (root user, missing headers) |
-| 6   | Container  | Trivy image       | Final Docker image (`nginx:1.27-alpine`)     | CVEs in the container's OS packages          |
+|     | Component | Tool              | What it scans                            | What it finds                                  |
+| --- | --------- | ----------------- | ---------------------------------------- | ---------------------------------------------- |
+| 1   | Secrets   | Gitleaks          | Entire Git history + current code        | Exposed API keys, PATs, private keys           |
+| 2   | SAST      | Semgrep           | TypeScript/Angular source code           | Hardcoded secrets (JWT, passwords, keys)       |
+| 3   | Quality   | ESLint + Karma    | Source code + unit tests                 | `eval()`, `new Function()`, bugs               |
+| 4   | SCA       | Trivy + npm audit | `package-lock.json` + `node_modules/`    | CVEs in npm libraries (Angular, rxjs)          |
+| 5   | IaC       | Trivy config      | `Dockerfile`, `nginx.conf`, YAML files   | Misconfigurations (root user, missing headers) |
+| 6   | Container | Trivy image       | Final Docker image (`nginx:1.27-alpine`) | CVEs in the container's OS packages            |
 
 ### Shift-Right
 
 This scan runs against the live application deployed on Render, simulating an external attacker.
 
-|     | Component  | Tool       | What it scans                     | What it finds                            |
-| --- | ---------- | ---------- | --------------------------------- | ---------------------------------------- |
-| 7   | DAST       | OWASP ZAP  | Live application on Render (HTTP/S) | XSS - Cross-Site Scripting, clickjacking |
+|     | Component | Tool      | What it scans                       | What it finds                            |
+| --- | --------- | --------- | ----------------------------------- | ---------------------------------------- |
+| 7   | DAST      | OWASP ZAP | Live application on Render (HTTP/S) | XSS - Cross-Site Scripting, clickjacking |
 
 ### Planted vulnerabilities
 
 The project contains 7 intentional vulnerabilities spread across several files,
 each detected by a scanner in the pipeline:
 
-| ID     | Type                        | File                 | CWE     | Detected by       |
-| ------ | --------------------------- | -------------------- | ------- | ----------------- |
-| VULN-1 | Hardcoded API Key           | `student.service.ts` | CWE-798 | Gitleaks, Semgrep |
-| VULN-2 | `new Function()` on input   | `student.service.ts` | CWE-94  | ESLint            |
-| VULN-3 | `eval()` on external data   | `student.service.ts` | CWE-94  | ESLint            |
-| VULN-4 | Hardcoded GitHub PA Token   | `student.service.ts` | CWE-798 | Gitleaks          |
-| VULN-5 | Hardcoded JWT token         | `auth.service.ts`    | CWE-798 | Semgrep           |
-| VULN-6 | Hardcoded RSA private key   | `environment.dev.ts` | CWE-321 | Gitleaks          |
-| VULN-7 | Hardcoded admin password    | `auth.service.ts`    | CWE-798 | Semgrep           |
+| ID     | Type                      | File                 | CWE     | Detected by       |
+| ------ | ------------------------- | -------------------- | ------- | ----------------- |
+| VULN-1 | Hardcoded API Key         | `student.service.ts` | CWE-798 | Gitleaks, Semgrep |
+| VULN-2 | `new Function()` on input | `student.service.ts` | CWE-94  | ESLint            |
+| VULN-3 | `eval()` on external data | `student.service.ts` | CWE-94  | ESLint            |
+| VULN-4 | Hardcoded GitHub PA Token | `student.service.ts` | CWE-798 | Gitleaks          |
+| VULN-5 | Hardcoded JWT token       | `auth.service.ts`    | CWE-798 | Semgrep           |
+| VULN-6 | Hardcoded RSA private key | `environment.dev.ts` | CWE-321 | Gitleaks          |
+| VULN-7 | Hardcoded admin password  | `auth.service.ts`    | CWE-798 | Semgrep           |
 
 ---
 
@@ -203,7 +203,7 @@ Repository → Actions
 - Status of each job (green = success, red = failure)
 - Detailed logs per step
 - Generated artifacts:<br>
-`sast-report`, `dependency-reports`, `gitleaks-report`, `iac-report`, `dast-report`, `quality-reports`
+  `sast-report`, `dependency-reports`, `gitleaks-report`, `iac-report`, `dast-report`, `quality-reports`
 
 ### Issues
 
@@ -219,20 +219,14 @@ The issue contains the problem description, the severity, the affected file and 
 
 ## Tools used
 
-| Tool                                                           | Role                                             | Cost                |
-| -------------------------------------------------------------- | ------------------------------------------------ | ------------------- |
-| [Semgrep CE](https://semgrep.dev)                              | SAST (p/security-audit, p/typescript, p/secrets) | Free                |
-| [Trivy](https://trivy.dev)                                     | SCA filesystem + IaC config + Container scanning | Free                |
-| [npm audit](https://docs.npmjs.com/cli/v10/commands/npm-audit) | SCA npm advisory database                        | Free                |
-| [Gitleaks](https://gitleaks.io)                                | Secret detection (entire Git history)            | Free                |
-| [OWASP ZAP](https://www.zaproxy.org)                           | DAST (baseline scan of the live application)     | Free                |
-| [ESLint](https://eslint.org)                                   | Linting + security rules (no-eval etc.)          | Free                |
-| [Karma](https://karma-runner.github.io)                        | Unit tests                                       | Free                |
-| [GitHub Actions](https://github.com/features/actions)          | CI/CD (10 automated stages)                      | Free                |
-| [Render](https://render.com)                                   | Cloud Deploy PaaS                                | Free                |
-
----
-
-## License
-
-UPT - SISC Master's | Cloud Application Security
+| Tool                                                           | Role                                             | Cost |
+| -------------------------------------------------------------- | ------------------------------------------------ | ---- |
+| [Semgrep CE](https://semgrep.dev)                              | SAST (p/security-audit, p/typescript, p/secrets) | Free |
+| [Trivy](https://trivy.dev)                                     | SCA filesystem + IaC config + Container scanning | Free |
+| [npm audit](https://docs.npmjs.com/cli/v10/commands/npm-audit) | SCA npm advisory database                        | Free |
+| [Gitleaks](https://gitleaks.io)                                | Secret detection (entire Git history)            | Free |
+| [OWASP ZAP](https://www.zaproxy.org)                           | DAST (baseline scan of the live application)     | Free |
+| [ESLint](https://eslint.org)                                   | Linting + security rules (no-eval etc.)          | Free |
+| [Karma](https://karma-runner.github.io)                        | Unit tests                                       | Free |
+| [GitHub Actions](https://github.com/features/actions)          | CI/CD (10 automated stages)                      | Free |
+| [Render](https://render.com)                                   | Cloud Deploy PaaS                                | Free |
