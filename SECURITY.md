@@ -25,14 +25,14 @@ integrated into the CI/CD pipeline (GitHub Actions):
 | **Trivy fs**      | SCA         | CVEs in npm dependencies (package-lock.json)     | On every push/PR   |
 | **npm audit**     | SCA         | npm advisory database (HIGH+ severity)           | On every push/PR   |
 | **Gitleaks**      | Secrets     | API keys, PATs, private keys in the Git history  | On every push/PR   |
-| **Trivy config**  | IaC         | Dockerfile, nginx, YAML misconfigurations        | On every push/PR   |
+| **Trivy config**  | IaC         | Dockerfile and YAML misconfigurations            | On every push/PR   |
 | **Trivy image**   | Container   | CVEs in the Docker image (nginx:1.27-alpine)     | On every push/PR   |
 
 ### Shift-Right
 
 | Tool          | Scan type   | What it detects                              | Frequency               |
 | ------------- | ----------- | -------------------------------------------- | ----------------------- |
-| **OWASP ZAP** | DAST        | Reflected XSS, missing headers, clickjacking | After deploy to Render  |
+| **OWASP ZAP** | DAST        | Missing/misconfigured headers, CSP, cookies  | After deploy to Render  |
 
 ### Intentional vulnerabilities
 
@@ -42,7 +42,7 @@ The project contains 7 planted vulnerabilities to demonstrate scanner detection:
 | ------ | --------------------------- | -------------------- | ------- | ----------------- |
 | VULN-1 | Hardcoded API Key           | `student.service.ts` | CWE-798 | Gitleaks, Semgrep |
 | VULN-2 | `new Function()` on input   | `student.service.ts` | CWE-94  | ESLint            |
-| VULN-3 | `eval()` on external data   | `student.service.ts` | CWE-94  | ESLint            |
+| VULN-3 | `eval()` on external data   | `student.service.ts` | CWE-94  | ESLint, Semgrep   |
 | VULN-4 | Hardcoded GitHub PAT        | `student.service.ts` | CWE-798 | Gitleaks          |
 | VULN-5 | Hardcoded JWT token         | `auth.service.ts`    | CWE-798 | Semgrep           |
 | VULN-6 | Hardcoded RSA private key   | `environment.dev.ts` | CWE-321 | Gitleaks          |
