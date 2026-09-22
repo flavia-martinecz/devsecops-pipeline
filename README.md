@@ -241,3 +241,9 @@ The issue contains the problem description, the severity, the affected file and 
 | [Karma](https://karma-runner.github.io)                        | Unit tests                                       | Free |
 | [GitHub Actions](https://github.com/features/actions)          | CI/CD (10 automated stages)                      | Free |
 | [Render](https://render.com)                                   | Cloud Deploy PaaS                                | Free |
+
+---
+
+## License
+
+This project is released under the [MIT License](LICENSE) — free to use, modify and distribute, with no warranty.

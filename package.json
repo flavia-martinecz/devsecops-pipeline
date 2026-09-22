@@ -2,6 +2,7 @@
   "name": "student-portal-angular",
   "version": "1.0.0",
   "description": "Angular student portal — DevSecOps demo project",
+  "license": "MIT",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
